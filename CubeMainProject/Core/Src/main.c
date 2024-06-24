@@ -22,6 +22,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "lvgl/lvgl.h"
+#include "lvgl/lv_port_disp.h"
+#include "lvgl/gui/GUI.h"
+
 #include "ST7789.h"
 /* USER CODE END Includes */
 
@@ -42,10 +46,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
+DMA_HandleTypeDef hdma_spi1_tx;
 
 osThreadId defaultTaskHandle;
 uint32_t defaultTaskBuffer[ 128 ];
 osStaticThreadDef_t defaultTaskControlBlock;
+osThreadId LvglTaskHandle;
+uint32_t LvglTaskBuffer[ 1024 ];
+osStaticThreadDef_t LvglTaskControlBlock;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -53,8 +61,10 @@ osStaticThreadDef_t defaultTaskControlBlock;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 void StartDefaultTask(void const * argument);
+void StartLvglTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -81,7 +91,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  __enable_irq();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -93,14 +103,40 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+  // TEST CODE
+
   ST7789_GPIO_Init();
   ST7789_Init();
+  static volatile uint16_t colors[(ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 10];
+  static volatile uint16_t y_step = ST7789_LCD_HEIGHT / 10;
+  // Pixel by pixel
+  for (size_t i = 0; i < sizeof(colors) >> 1; i++) {colors[i] = 0xFFE0;}
+  for (size_t i = 0; i < 10; i++)
+  {
+	  uint16_t x1 = 0, x2 = ST7789_LCD_WIDTH;
+	  uint16_t y1 = y_step * i, y2 = y1 + y_step;
+	  ST7789_FillArea_PixelByPixel(x1, y1, x2, y2, (uint16_t *)&colors[0]);
+  }
+  /*
+  // Whole array in one go
+  for (size_t i = 0; i < sizeof(colors) >> 1; i++) {colors[i] = 0xFFE0;}
+  for (size_t i = 0; i < 10; i++)
+  {
+    uint16_t x1 = 0, x2 = ST7789_LCD_WIDTH;
+    uint16_t y1 = y_step * i, y2 = y1 + y_step;
+    ST7789_FillArea(x1, y1, x2, y2, (uint16_t *)&colors[0]);
+  }
 
-  static volatile uint16_t color = 0xFFE0;
-  ST7789_FillAreaWithColor(0, 0, 240, 280, color);
+  // Trough DMA
+  // ...
+  */
 
+  lv_init();
+  lv_port_disp_init();
+  GUI_Init();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -123,6 +159,10 @@ int main(void)
   /* definition and creation of defaultTask */
   osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128, defaultTaskBuffer, &defaultTaskControlBlock);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* definition and creation of LvglTask */
+  osThreadStaticDef(LvglTask, StartLvglTask, osPriorityNormal, 0, 1024, LvglTaskBuffer, &LvglTaskControlBlock);
+  LvglTaskHandle = osThreadCreate(osThread(LvglTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -228,6 +268,22 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -266,6 +322,26 @@ void StartDefaultTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartLvglTask */
+/**
+* @brief Function implementing the LvglTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLvglTask */
+void StartLvglTask(void const * argument)
+{
+  /* USER CODE BEGIN StartLvglTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	lv_tick_inc(5);
+	lv_timer_handler();
+    osDelay(5);
+  }
+  /* USER CODE END StartLvglTask */
 }
 
 /**

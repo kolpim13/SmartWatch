@@ -8,6 +8,13 @@
 #include "ST7789.h"
 
 extern SPI_HandleTypeDef hspi1;
+extern DMA_HandleTypeDef hdma_spi1_tx;
+
+static void ST7789_WriteCommand(uint8_t command);
+static void ST7789_WriteData(uint16_t data);
+static void ST7789_WriteData8(uint8_t data);
+static void ST7789_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+/*=================================================================*/
 
 static void ST7789_WriteCommand(uint8_t command)
 {
@@ -31,15 +38,15 @@ static void ST7789_WriteData8(uint8_t data)
     HAL_SPI_Transmit(&hspi1, &data, 1, 1);
 }
 
-static void ST7789_SetAddress(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+static void ST7789_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
     ST7789_WriteCommand(ST7789_CASET);
-    ST7789_WriteData(x0);
     ST7789_WriteData(x1);
+    ST7789_WriteData(x2);
 
     ST7789_WriteCommand(ST7789_RASET);
-    ST7789_WriteData(y0 + ST7789_OFFSET_Y);
     ST7789_WriteData(y1 + ST7789_OFFSET_Y);
+    ST7789_WriteData(y2 + ST7789_OFFSET_Y);
 
     ST7789_WriteCommand(ST7789_RAMWR);
 }
@@ -145,29 +152,49 @@ void ST7789_Init(void)
 	ST7789_WriteCommand(ST7789_DISPON); 
 }
 
-void ST7789_FillAreaWithColor(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color)
+void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
 {
-    ST7789_SetAddress(x0, y0, x1, y1);
-    size_t size = (y1 - y0) * (x1 - x0);
-    for (size_t i = 0; i < size; i++)
-    {
-        ST7789_WriteData(color);
-    }
-}
-
-void ST7789_FillArea(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t* color)
-{
-	ST7789_SetAddress(x0, y0, x1, y1);
-    uint16_t size = (x1 - x0) * (y1 - y0);
+	ST7789_SetAddress(x1, y1, x2, y2);
+    size_t size = (y2 - y1 + 1) * (x2 - x1 + 1);
 
     hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
 	hspi1.Instance->CR1 |= SPI_CR1_DFF;
-    //HAL_SPI_Init(&hspi1);
 
     ST7789_DC_Data();
     HAL_SPI_Transmit(&hspi1, (uint8_t *)color, size, HAL_MAX_DELAY);
 
     hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
 	hspi1.Instance->CR1 &= ~SPI_CR1_DFF;
-    //HAL_SPI_Init(&hspi1);
+}
+
+void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
+{
+	ST7789_SetAddress(x1, y1, x2, y2);
+    size_t size = (y2 - y1 + 1) * (x2 - x1 + 1);
+	
+	hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
+	hspi1.Instance->CR1 |= SPI_CR1_DFF;
+
+	ST7789_DC_Data();
+	HAL_SPI_Transmit_DMA(&hspi1, (uint8_t*)color, size);
+	while(__HAL_DMA_GET_COUNTER(&hdma_spi1_tx)!=0);
+
+	hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+	hspi1.Instance->CR1 &= ~SPI_CR1_DFF;
+}
+
+void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
+{
+    ST7789_SetAddress(x1, y1, x2, y2);
+    size_t size = (y2 - y1) * (x2 - x1);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        ST7789_WriteData(color[i]);
+        if (i == 3360)
+        {
+        	ST7789_WriteData(color[i - 1]);
+        	continue;
+        }
+    }
 }

@@ -73,17 +73,11 @@
 #define ST7789_RST_Set()        HAL_GPIO_WritePin(ST7789_RST_PORT, ST7789_RST_PIN, GPIO_PIN_SET)
 #define ST7789_RST_Clr()        HAL_GPIO_WritePin(ST7789_RST_PORT, ST7789_RST_PIN, GPIO_PIN_RESET)
 /*=================================================================*/
-
-static void ST7789_WriteCommand(uint8_t command);
-static void ST7789_WriteData(uint16_t data);
-static void ST7789_WriteData8(uint8_t data);
-static void ST7789_SetAddress(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-/*=================================================================*/
-
 void ST7789_GPIO_Init(void);
 void ST7789_Init(void);
-void ST7789_FillArea(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t* color);
-void ST7789_FillAreaWithColor(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
+void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
+void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 /*=================================================================*/
 
 #endif /* ST7789_ST7789_H_ */
