@@ -24,7 +24,9 @@
 /* USER CODE BEGIN Includes */
 #include "lvgl/lvgl.h"
 #include "lvgl/lv_port_disp.h"
+#include "lvgl/lv_port_indev.h"
 #include "lvgl/gui/GUI.h"
+#include "lvgl/gui/GUI_MainPage.h"
 
 #include "ST7789.h"
 /* USER CODE END Includes */
@@ -45,6 +47,10 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
+
+RTC_HandleTypeDef hrtc;
+
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
@@ -63,6 +69,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_RTC_Init(void);
 void StartDefaultTask(void const * argument);
 void StartLvglTask(void const * argument);
 
@@ -105,38 +113,13 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
+  MX_I2C1_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  // TEST CODE
-
-  ST7789_GPIO_Init();
-  ST7789_Init();
-  static volatile uint16_t colors[(ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 10];
-  static volatile uint16_t y_step = ST7789_LCD_HEIGHT / 10;
-  // Pixel by pixel
-  for (size_t i = 0; i < sizeof(colors) >> 1; i++) {colors[i] = 0xFFE0;}
-  for (size_t i = 0; i < 10; i++)
-  {
-	  uint16_t x1 = 0, x2 = ST7789_LCD_WIDTH;
-	  uint16_t y1 = y_step * i, y2 = y1 + y_step;
-	  ST7789_FillArea_PixelByPixel(x1, y1, x2, y2, (uint16_t *)&colors[0]);
-  }
-  /*
-  // Whole array in one go
-  for (size_t i = 0; i < sizeof(colors) >> 1; i++) {colors[i] = 0xFFE0;}
-  for (size_t i = 0; i < 10; i++)
-  {
-    uint16_t x1 = 0, x2 = ST7789_LCD_WIDTH;
-    uint16_t y1 = y_step * i, y2 = y1 + y_step;
-    ST7789_FillArea(x1, y1, x2, y2, (uint16_t *)&colors[0]);
-  }
-
-  // Trough DMA
-  // ...
-  */
-
   lv_init();
   lv_port_disp_init();
   GUI_Init();
+  GUI_MainPage_Create();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -200,7 +183,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -227,6 +211,103 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+  */
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 1;
+  sDate.Year = 0;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
+
 }
 
 /**
@@ -334,12 +415,20 @@ void StartDefaultTask(void const * argument)
 void StartLvglTask(void const * argument)
 {
   /* USER CODE BEGIN StartLvglTask */
+  uint8_t counter = 0;
   /* Infinite loop */
   for(;;)
   {
 	lv_tick_inc(5);
 	lv_timer_handler();
     osDelay(5);
+
+    counter++;
+    if (counter == 100)
+    {
+    	GUI_MainPage_UpdateTime();
+    	counter = 0;
+    }
   }
   /* USER CODE END StartLvglTask */
 }
