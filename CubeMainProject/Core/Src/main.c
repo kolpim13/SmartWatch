@@ -29,6 +29,7 @@
 #include "lvgl/gui/GUI_MainPage.h"
 
 #include "ST7789.h"
+#include "CST816.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -118,6 +119,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   lv_init();
   lv_port_disp_init();
+  lv_port_indev_init();
   GUI_Init();
   GUI_MainPage_Create();
   /* USER CODE END 2 */

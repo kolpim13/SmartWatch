@@ -8,15 +8,12 @@ static void event_time_lb_refresh_cb(lv_event_t* event);
 
 static void event_time_lb_refresh_cb(lv_event_t* event)
 {
-	static volatile uint8_t seconds;
     RTC_TimeTypeDef sTime = {0};
     RTC_DateTypeDef sDate = {0};
 
     /* Both GetTime and GetDate should be called simultaneousely to refresh time correctly. */
     HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
     HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
-
-    seconds = ((sTime.Seconds / 16) * 10) + (sTime.Seconds % 16);
 
     /* Casting is needed. Every 10 seconds HAL rounds results to hex format. So 10 seconds == 16. */
     lv_label_set_text_fmt(time_lb, "%02u:%02u:%02u",
