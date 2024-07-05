@@ -22,14 +22,15 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "ST7789.h"
+#include "CST816.h"
+#include "BL24C02F.h"
+#include "nvm.h"
+
 #include "lvgl/lvgl.h"
 #include "lvgl/lv_port_disp.h"
 #include "lvgl/lv_port_indev.h"
 #include "lvgl/gui/GUI.h"
-#include "lvgl/gui/GUI_MainPage.h"
-
-#include "ST7789.h"
-#include "CST816.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,18 +50,22 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
-osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 128 ];
-osStaticThreadDef_t defaultTaskControlBlock;
+osThreadId EepromTaskHandle;
+uint32_t EepromTaskBuffer[ 128 ];
+osStaticThreadDef_t EepromTaskControlBlock;
 osThreadId LvglTaskHandle;
 uint32_t LvglTaskBuffer[ 1024 ];
 osStaticThreadDef_t LvglTaskControlBlock;
+osMessageQId EepromQueueHandle;
+uint8_t EepromQueueBuffer[ 16 * sizeof( uint8_t ) ];
+osStaticMessageQDef_t EepromQueueControlBlock;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -72,7 +77,8 @@ static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_RTC_Init(void);
-void StartDefaultTask(void const * argument);
+static void MX_I2C2_Init(void);
+void StartEepromTask(void const * argument);
 void StartLvglTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -116,12 +122,26 @@ int main(void)
   MX_SPI1_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
+  NvM_Read_All();
+
   lv_init();
   lv_port_disp_init();
   lv_port_indev_init();
   GUI_Init();
-  GUI_MainPage_Create();
+
+  /*
+  size_t len = 13;
+  uint8_t address = 100;
+  volatile uint8_t data[len];
+  for (size_t i = 0; i < len; i++) { data[i] = 0xBB; }
+  if (BL24C02F_ReadData(address, data, len) == BL24C02F_Status_I2C_Error) {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
+  for (size_t i = 0; i < len; i++) { data[i] = 0xCC; }
+  if (BL24C02F_WriteData(address, data, len) == BL24C02F_Status_I2C_Error)  {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
+  for (size_t i = 0; i < len; i++) { data[i] = 0xDD; }
+  if (BL24C02F_ReadData(address, data, len) == BL24C02F_Status_I2C_Error)  {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
+  */
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -136,14 +156,19 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of EepromQueue */
+  osMessageQStaticDef(EepromQueue, 16, uint8_t, EepromQueueBuffer, &EepromQueueControlBlock);
+  EepromQueueHandle = osMessageCreate(osMessageQ(EepromQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128, defaultTaskBuffer, &defaultTaskControlBlock);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* definition and creation of EepromTask */
+  osThreadStaticDef(EepromTask, StartEepromTask, osPriorityNormal, 0, 128, EepromTaskBuffer, &EepromTaskControlBlock);
+  EepromTaskHandle = osThreadCreate(osThread(EepromTask), NULL);
 
   /* definition and creation of LvglTask */
   osThreadStaticDef(LvglTask, StartLvglTask, osPriorityNormal, 0, 1024, LvglTaskBuffer, &LvglTaskControlBlock);
@@ -231,7 +256,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -246,6 +271,40 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 400000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
 
 }
 
@@ -378,8 +437,8 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -389,20 +448,38 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartEepromTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the EepromTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+/* USER CODE END Header_StartEepromTask */
+void StartEepromTask(void const * argument)
 {
   /* USER CODE BEGIN 5 */
+  NvM_Block_t block_type;
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  if (xQueueReceive(EepromQueueHandle,
+			  &block_type,
+			  (TickType_t) 100) == pdPASS)
+	  {
+		  switch (block_type)
+		  {
+		      case NvM_Block_Time:
+		      {
+		    	  NvM_Save_Time();
+		    	  break;
+		      }
+		      default:
+		      {
+		    	  break;
+		      }
+		  }
+	  }
   }
   /* USER CODE END 5 */
 }
@@ -428,7 +505,7 @@ void StartLvglTask(void const * argument)
     counter++;
     if (counter == 100)
     {
-    	GUI_MainPage_UpdateTime();
+    	GUI_MainScreen_UpdateDateAndTime_Notify();
     	counter = 0;
     }
   }
