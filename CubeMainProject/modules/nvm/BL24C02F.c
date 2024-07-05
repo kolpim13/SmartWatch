@@ -45,39 +45,88 @@ void BL24C02F_ResetI2C(void)
     HAL_I2C_Init(&hi2c2);
 }
 
-void BL24C02F_WriteData(size_t address, uint8_t* data, size_t len)
+BL24C02F_Status_e BL24C02F_WriteData(uint8_t address, uint8_t* data, size_t len)
 {
-    volatile HAL_StatusTypeDef ret;
+    uint16_t len_to_write = 0, mod = 0, data_written = 0;
 
     /* Check if data can be written into the eeprom. */
     if ((address + len) > BL24C02F_MAX_LEN)
     {
-        /* Add return code */
-        // ...
-        return;
+        return BL24C02F_Status_TooMuchData;
+    }
+
+    /* Allign address to 8-byte */
+    mod = address % 8;
+    if (mod % 8 != 0)
+    {
+        /* Decide how many byte to write */
+        if ((mod + len) < 8)
+        {
+            len_to_write = len;
+        }
+        else
+        {
+            len_to_write = 8 - mod;
+        }
+
+        /* Write those unaligned data */
+        if (HAL_I2C_Mem_Write(&hi2c2, BL24C02F_ADDRESS, (uint16_t)address, I2C_MEMADD_SIZE_8BIT, &data[0], len_to_write, HAL_MAX_DELAY) != HAL_OK)
+        {
+            return BL24C02F_Status_I2C_Error;
+        }
+
+        data_written += len_to_write;
+        address += len_to_write;
+        len -= len_to_write;
+
+        HAL_Delay(10);
+    }
+
+    /* Write alligned data. */
+    while (len > 0)
+    {
+        if ((len / 8) > 0)
+        {
+            len_to_write = 8;
+        }
+        else
+        {
+            len_to_write = len;
+        }
+
+        if (HAL_I2C_Mem_Write(&hi2c2, BL24C02F_ADDRESS, (uint16_t)address, I2C_MEMADD_SIZE_8BIT, &data[data_written], len_to_write, HAL_MAX_DELAY) != HAL_OK)
+        {
+            return BL24C02F_Status_I2C_Error;
+        }
+
+        data_written += len_to_write;
+        address += len_to_write;
+        len -= len_to_write;
+
+        HAL_Delay(10);
     }
     
-    ret = HAL_I2C_Mem_Write(&hi2c2, BL24C02F_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, data, len, HAL_MAX_DELAY);
-    //ret = HAL_I2C_Master_Transmit(&hi2c2, BL24C02F_ADDRESS, data, len, HAL_MAX_DELAY);
-    if (ret != HAL_OK)
-    {
-        BL24C02F_ResetI2C();
-        ret = HAL_I2C_Mem_Write(&hi2c2, BL24C02F_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, data, len, HAL_MAX_DELAY);
-        //ret = HAL_I2C_Master_Transmit(&hi2c2, BL24C02F_ADDRESS, data, len, HAL_MAX_DELAY);
-    }
+    return BL24C02F_Status_OK;
 }
 
-void BL24C02F_ReadData(uint8_t* data, size_t len)
+BL24C02F_Status_e BL24C02F_ReadData(uint8_t address, uint8_t* data, size_t len)
 {
-    volatile HAL_StatusTypeDef ret;
-
-    //volatile HAL_StatusTypeDef ret = HAL_I2C_Mem_Read(&hi2c2, BL24C02F_ADDRESS, 0, I2C_MEMADD_SIZE_8BIT, data, 256, 10);
-    ret = HAL_I2C_Master_Receive(&hi2c2, BL24C02F_ADDRESS, data, len, HAL_MAX_DELAY);
-
-    if (ret != HAL_OK)
+    /* Check if data can be written into the eeprom. */
+    if ((address + len) > BL24C02F_MAX_LEN)
     {
-    	BL24C02F_ResetI2C();
-    	ret = HAL_I2C_Master_Receive(&hi2c2, BL24C02F_ADDRESS, data, len, HAL_MAX_DELAY);
+        return BL24C02F_Status_TooMuchData;
     }
 
+    /* Set address and read data. */
+    if (HAL_I2C_Master_Transmit(&hi2c2, BL24C02F_ADDRESS, (uint8_t *)&address, 1, 1) != HAL_OK)
+    {
+        return BL24C02F_Status_I2C_Error;
+    }
+    
+    if (HAL_I2C_Master_Receive(&hi2c2, BL24C02F_ADDRESS, data, len, HAL_MAX_DELAY) != HAL_OK)
+    {
+        return BL24C02F_Status_I2C_Error;
+    }
+    
+    return BL24C02F_Status_OK;
 }
