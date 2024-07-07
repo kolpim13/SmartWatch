@@ -61,7 +61,7 @@ osThreadId EepromTaskHandle;
 uint32_t EepromTaskBuffer[ 128 ];
 osStaticThreadDef_t EepromTaskControlBlock;
 osThreadId LvglTaskHandle;
-uint32_t LvglTaskBuffer[ 1024 ];
+uint32_t LvglTaskBuffer[ 2048 ];
 osStaticThreadDef_t LvglTaskControlBlock;
 osMessageQId EepromQueueHandle;
 uint8_t EepromQueueBuffer[ 16 * sizeof( uint8_t ) ];
@@ -131,17 +131,6 @@ int main(void)
   lv_port_indev_init();
   GUI_Init();
 
-  /*
-  size_t len = 13;
-  uint8_t address = 100;
-  volatile uint8_t data[len];
-  for (size_t i = 0; i < len; i++) { data[i] = 0xBB; }
-  if (BL24C02F_ReadData(address, data, len) == BL24C02F_Status_I2C_Error) {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
-  for (size_t i = 0; i < len; i++) { data[i] = 0xCC; }
-  if (BL24C02F_WriteData(address, data, len) == BL24C02F_Status_I2C_Error)  {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
-  for (size_t i = 0; i < len; i++) { data[i] = 0xDD; }
-  if (BL24C02F_ReadData(address, data, len) == BL24C02F_Status_I2C_Error)  {BL24C02F_ResetI2C(); BL24C02F_ReadData(address, data, len); }
-  */
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -171,7 +160,7 @@ int main(void)
   EepromTaskHandle = osThreadCreate(osThread(EepromTask), NULL);
 
   /* definition and creation of LvglTask */
-  osThreadStaticDef(LvglTask, StartLvglTask, osPriorityNormal, 0, 1024, LvglTaskBuffer, &LvglTaskControlBlock);
+  osThreadStaticDef(LvglTask, StartLvglTask, osPriorityNormal, 0, 2048, LvglTaskBuffer, &LvglTaskControlBlock);
   LvglTaskHandle = osThreadCreate(osThread(LvglTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

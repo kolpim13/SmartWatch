@@ -11,9 +11,13 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
 
+#include <stdbool.h>
+
 /* LCD physical parameters */
 #define ST7789_LCD_WIDTH    240
 #define ST7789_LCD_HEIGHT   280
+
+#define ST7789_OFFSET_Y 	20      // Offset in HW
 
 /* Control Registers and constant codes */
 #define ST7789_NOP     0x00
@@ -38,8 +42,6 @@
 #define ST7789_PTLAR   0x30     // 
 #define ST7789_COLMOD  0x3A     // Interface pixel format
 #define ST7789_MADCTL  0x36
-
-#define ST7789_OFFSET_Y 20      // Offset in HW
 /*=================================================================*/
 
 #define ST7789_CLK_PORT         GPIOB
@@ -73,11 +75,16 @@
 #define ST7789_RST_Set()        HAL_GPIO_WritePin(ST7789_RST_PORT, ST7789_RST_PIN, GPIO_PIN_SET)
 #define ST7789_RST_Clr()        HAL_GPIO_WritePin(ST7789_RST_PORT, ST7789_RST_PIN, GPIO_PIN_RESET)
 /*=================================================================*/
+
 void ST7789_GPIO_Init(void);
 void ST7789_Init(void);
 void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
+
+bool ST7789_Async_CheckTrasferFinished(void);
+void ST7789_PrepaerSendSmallData(void);
+void ST7789_PrepaerSendLargeData(void);
 /*=================================================================*/
 
 #endif /* ST7789_ST7789_H_ */

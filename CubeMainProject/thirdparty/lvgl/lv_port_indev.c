@@ -76,12 +76,12 @@ static void touchpad_init(void)
 /*Will be called by the library to read the touchpad*/
 static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 {
-    static int32_t last_x = 0;
-    static int32_t last_y = 0;
+    static uint16_t last_x = 0;
+    static uint16_t last_y = 0;
 
     /*Save the pressed coordinates and the state*/
-    
-    if(CST816_IsTouch() == true) {
+    if (touchpad_is_pressed() == true)
+    {
         CST816_GetAxis_XY(&last_x, &last_y);
         data->state = LV_INDEV_STATE_PR;
     }
@@ -90,8 +90,8 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
     }
 
     /*Set the last pressed coordinates*/
-    data->point.x = last_x;
-    data->point.y = last_y;
+    data->point.x = (int32_t)last_x;
+    data->point.y = (int32_t)last_y;
 }
 
 /*Return true is the touchpad is pressed*/

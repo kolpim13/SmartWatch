@@ -27,12 +27,12 @@
  *  STATIC PROTOTYPES
  **********************/
 static void disp_init(void);
-
 static void disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
 
 /**********************
  *  STATIC VARIABLES
  **********************/
+static lv_display_t* disp = NULL;
 
 /**********************
  *      MACROS
@@ -48,7 +48,7 @@ void lv_port_disp_init(void)
     disp_init();
 
     /* Create main display */
-    lv_display_t * disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
+    disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
 
     /* Create buffer to be used by display */
     static lv_color_t disp_buf[MY_DISP_BUF_LEN];
