@@ -22,10 +22,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "power.h"
+#include "nvm.h"
+#include "RTC.h"
 #include "ST7789.h"
 #include "CST816.h"
 #include "BL24C02F.h"
-#include "nvm.h"
 
 #include "lvgl/lvgl.h"
 #include "lvgl/lv_port_disp.h"
@@ -123,9 +125,12 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   MX_I2C2_Init();
-  /* USER CODE BEGIN 2 */
-  NvM_Read_All();
 
+  /* USER CODE BEGIN 2 */
+  POWER_GPIO_Init();
+  POWER_ENABLE();
+  NvM_Read_All();
+  RTC_Init();
   lv_init();
   lv_port_disp_init();
   lv_port_indev_init();
@@ -306,7 +311,8 @@ static void MX_RTC_Init(void)
 {
 
   /* USER CODE BEGIN RTC_Init 0 */
-
+  /* Exit this function, so user code can be executed later. */
+  return;
   /* USER CODE END RTC_Init 0 */
 
   RTC_TimeTypeDef sTime = {0};

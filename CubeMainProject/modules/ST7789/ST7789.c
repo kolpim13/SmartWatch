@@ -9,6 +9,7 @@
 
 extern SPI_HandleTypeDef hspi1;
 extern DMA_HandleTypeDef hdma_spi1_tx;
+/*=================================================================*/
 
 static void ST7789_WriteCommand(uint8_t command);
 static void ST7789_WriteData(uint16_t data);

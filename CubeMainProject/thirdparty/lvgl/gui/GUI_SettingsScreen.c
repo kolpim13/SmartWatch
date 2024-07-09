@@ -1,4 +1,19 @@
 #include "GUI_SettingsScreen.h"
+#include "../nvm/nvm.h"
+#include <FreeRTOS.h>
+#include <queue.h>
+
+extern RTC_HandleTypeDef hrtc;
+extern QueueHandle_t EepromQueueHandle;
+/*=================================================================*/
+
+/* Pages content */
+static void Menu_SettingsPageContent_TimeAndDate(lv_obj_t* content);
+
+/* Callbacks */
+static void event_TimeAndDate_DdTimeValueChanged(lv_event_t* event);
+static void event_TimeAndDate_BtnApply_cb(lv_event_t* event);
+/*=================================================================*/
 
 /* MENU */
 static lv_obj_t* menu = NULL;
@@ -13,14 +28,6 @@ static lv_obj_t* dd_hours;
 static lv_obj_t* dd_minutes;
 static lv_obj_t* dd_seconds;
 static bool time_was_changed_bo = false;
-/*=================================================================*/
-
-/* Pages content */
-static void Menu_SettingsPageContent_TimeAndDate(lv_obj_t* content);
-
-/* Callbacks */
-static void event_TimeAndDate_DdTimeValueChanged(lv_event_t* event);
-static void event_TimeAndDate_BtnApply_cb(lv_event_t* event);
 /*=================================================================*/
 
 static void Menu_SettingsPageContent_TimeAndDate(lv_obj_t* content)
@@ -90,11 +97,40 @@ static void event_TimeAndDate_BtnApply_cb(lv_event_t* event)
         return;
     }
 
-    /* Set time in RTC */
-    // ...
+    NvM_config_t* nvm = NvM_GetConfig();
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+
+    /* Get data from drop down lists. */
+    uint8_t buf[3];
+    lv_dropdown_get_selected_str(dd_hours, buf, sizeof(buf));
+    uint8_t hours = atoi(buf);
+    lv_dropdown_get_selected_str(dd_minutes, buf, sizeof(buf));
+    uint8_t minutes = atoi(buf);
+    lv_dropdown_get_selected_str(dd_seconds, buf, sizeof(buf));
+    uint8_t seconds = atoi(buf);
 
     /* Save it in eeprom */
-    // ...
+    nvm->data.interpret.time.Hours = hours;
+    nvm->data.interpret.time.Minutes = minutes;
+    nvm->data.interpret.time.Seconds = seconds;
+    NvM_Block_t block_type = NvM_Block_Time;
+    if (xQueueSend (EepromQueueHandle,
+                       (void *)&block_type,
+                       (TickType_t)0) != pdPASS)
+    {
+        /* Add some notification for the user */
+        // ...
+        return;
+    }
+
+    /* Set time in RTC */
+    sTime.Hours = hours;
+    sTime.Minutes = minutes;
+    sTime.Seconds = seconds;
+    HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 
     time_was_changed_bo = false;
 }

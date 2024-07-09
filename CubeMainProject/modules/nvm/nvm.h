@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2024
  * 
  * @todo Add validity mechanism
+ * @todo Add mechanizm to define if this eeprom is setup for the first time.
+ *      If YES ==> write default values into eeprom.
  */
 
 #ifndef NvM_NvM_H_
