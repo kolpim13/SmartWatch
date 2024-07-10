@@ -22,6 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "sys.h"
 #include "power.h"
 #include "nvm.h"
 #include "RTC.h"
