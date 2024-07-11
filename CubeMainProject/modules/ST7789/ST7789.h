@@ -1,8 +1,15 @@
-/*
- * ST7789.h
- *
- *  Created on: Jun 24, 2024
- *      Author: torgu
+/**
+ * @file ST7789.h
+ * @author Maksym T. (torgunakovmaks2@gmail.com)
+ * @brief LCD TFT low level driver.
+ * @version 0.1
+ *  Initial release
+ * @version 0.2:
+ *  Now supports asyncronous data transfer using DMA.
+ * @date 2024-06-27
+ * 
+ * @copyright Copyright (c) 2024
+ * 
  */
 
 #ifndef ST7789_ST7789_H_
@@ -82,9 +89,19 @@ void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_
 void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 
-bool ST7789_Async_CheckTrasferFinished(void);
-void ST7789_PrepaerSendSmallData(void);
-void ST7789_PrepaerSendLargeData(void);
+/**
+ * @brief Check if ST7789 is BUSY transferring data.
+ * 
+ * @return true - ST7789 is ready to transfer new data 
+ * @return false - ST7789 is BUSY at the moment 
+ */
+bool ST7789_CheckTrasferFinished(void);
+
+/**
+ * @brief Should be called from external modules to notify that HW data can be transfered again.
+ * 
+ */
+void ST7789_Async_TxFinished_cb(void);
 /*=================================================================*/
 
 #endif /* ST7789_ST7789_H_ */

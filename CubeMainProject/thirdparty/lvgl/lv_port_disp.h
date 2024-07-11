@@ -1,6 +1,11 @@
 /**
- * @file lv_port_disp_templ.h
- *
+ * @file lv_port_disp.h
+ * @version 0.2
+ * - Buffer update using DMA
+ * @todo
+ * 1. Try to increase screen update speed:
+ *  1.1. Look for task call periodic and how lvgl takes time elapsed (Data from HW Timer can be used).
+ *  1.2. Try to use 2 buffres | + (Makes render faster).
  */
 
 /*Copy this file as "lv_port_disp.h" and set this value to "1" to enable content*/
@@ -43,6 +48,13 @@ void disp_enable_update(void);
 /* Disable updating the screen (the flushing process) when disp_flush() is called by LVGL
  */
 void disp_disable_update(void);
+
+/**
+ * @brief 
+ * 
+ * @return lv_display_t* 
+ */
+lv_display_t* disp_main_get(void);
 
 /**********************
  *      MACROS

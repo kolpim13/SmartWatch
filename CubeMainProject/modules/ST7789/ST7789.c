@@ -15,6 +15,11 @@ static void ST7789_WriteCommand(uint8_t command);
 static void ST7789_WriteData(uint16_t data);
 static void ST7789_WriteData8(uint8_t data);
 static void ST7789_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+static void ST7789_PrepaerSendSmallData(void);
+static void ST7789_PrepaerSendLargeData(void);
+/*=================================================================*/
+
+static volatile bool data_transfer_finished = true;
 /*=================================================================*/
 
 static void ST7789_WriteCommand(uint8_t command)
@@ -51,6 +56,18 @@ static void ST7789_SetAddress(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
 
     ST7789_WriteCommand(ST7789_RAMWR);
 }
+
+static inline void ST7789_PrepaerSendSmallData(void)
+{
+	hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+	hspi1.Instance->CR1 &= ~SPI_CR1_DFF;
+}
+
+static inline void ST7789_PrepaerSendLargeData(void)
+{
+	hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
+	hspi1.Instance->CR1 |= SPI_CR1_DFF;
+}
 /*=================================================================*/
 
 void ST7789_GPIO_Init(void)
@@ -65,9 +82,6 @@ void ST7789_GPIO_Init(void)
     /* Set all pins in its default state (Plus enable blacklusght). */
     HAL_GPIO_WritePin(GPIOA, (ST7789_RST_PIN | ST7789_DC_PIN | ST7789_BLK_PIN), GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOA, ST7789_CS_PIN, GPIO_PIN_RESET);
-
-	/* Init DMA callback */
-
 }
 
 void ST7789_Init(void)
@@ -158,41 +172,50 @@ void ST7789_Init(void)
 
 void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
 {
+	if (data_transfer_finished == false)
+	{
+		return;
+	}
+	data_transfer_finished = false;
+
 	ST7789_SetAddress(x1, y1, x2, y2);
     size_t size = (y2 - y1 + 1) * (x2 - x1 + 1);
 
-    hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
-	hspi1.Instance->CR1 |= SPI_CR1_DFF;
-
+	ST7789_PrepaerSendLargeData();
     ST7789_DC_Data();
     HAL_SPI_Transmit(&hspi1, (uint8_t *)color, size, HAL_MAX_DELAY);
+    ST7789_PrepaerSendSmallData();
 
-    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-	hspi1.Instance->CR1 &= ~SPI_CR1_DFF;
+	data_transfer_finished = true;
 }
 
 void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
 {
+	static volatile size_t ndtr = 0;
+	/* If data transfer already started ==> return */
+	if (data_transfer_finished == false)
+	{
+		return;
+	}
+	data_transfer_finished = false;
+
 	ST7789_SetAddress(x1, y1, x2, y2);
     size_t size = (y2 - y1 + 1) * (x2 - x1 + 1);
 	
 	ST7789_PrepaerSendLargeData();
 
 	ST7789_DC_Data();
-	// if (hdma_spi1_tx.State == HAL_DMA_STATE_READY)
-	// {
-	// 	HAL_SPI_Transmit_DMA(&hspi1, (uint8_t*)color, size);
-	// 	while(__HAL_DMA_GET_COUNTER(&hdma_spi1_tx) != 0);
-	// }
 	HAL_SPI_Transmit_DMA(&hspi1, (uint8_t*)color, size);
-	while(__HAL_DMA_GET_COUNTER(&hdma_spi1_tx) != 0);
-	//HAL_SPI_Transmit(&hspi1, (uint8_t*)color, size, 10);
-
-	ST7789_PrepaerSendSmallData();
 }
 
 void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
 {
+	if (data_transfer_finished == false)
+	{
+		return;
+	}
+	data_transfer_finished = false;
+
     ST7789_SetAddress(x1, y1, x2, y2);
     size_t size = (y2 - y1) * (x2 - x1);
 
@@ -200,21 +223,18 @@ void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
     {
         ST7789_WriteData(color[i]);
     }
+
+	data_transfer_finished = true;
 }
 
-bool ST7789_Async_CheckTrasferFinished(void)
+bool ST7789_CheckTrasferFinished(void)
 {
-	return (__HAL_DMA_GET_COUNTER(&hdma_spi1_tx) == 0);
+	return data_transfer_finished;
 }
 
-void ST7789_PrepaerSendSmallData(void)
+void ST7789_Async_TxFinished_cb(void)
 {
-	hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-	hspi1.Instance->CR1 &= ~SPI_CR1_DFF;
-}
-
-void ST7789_PrepaerSendLargeData(void)
-{
-	hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
-	hspi1.Instance->CR1 |= SPI_CR1_DFF;
+	/* After transfering data through DMA usual data format should be restored */
+	ST7789_PrepaerSendSmallData();
+	data_transfer_finished = true;
 }

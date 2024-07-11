@@ -1,6 +1,6 @@
 /**
  * @file CST816.h
- * @author your name (you@domain.com)
+ * @author Maksym T. (torgunakovmaks2@gmail.com)
  * @brief 
  * @version 0.1
  * @date 2024-06-27

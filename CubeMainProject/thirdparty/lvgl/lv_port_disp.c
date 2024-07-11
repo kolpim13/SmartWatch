@@ -1,8 +1,3 @@
-/**
- * @file lv_port_disp_templ.c
- *
- */
-
 /*Copy this file as "lv_port_disp.c" and set this value to "1" to enable content*/
 #if 1
 
@@ -27,7 +22,7 @@
  *  STATIC PROTOTYPES
  **********************/
 static void disp_init(void);
-static void disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
+static void disp_flush(lv_display_t* disp, const lv_area_t* area, uint8_t* px_map);
 
 /**********************
  *  STATIC VARIABLES
@@ -51,8 +46,9 @@ void lv_port_disp_init(void)
     disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
 
     /* Create buffer to be used by display */
-    static lv_color_t disp_buf[MY_DISP_BUF_LEN];
-    lv_display_set_buffers(disp, disp_buf, NULL, sizeof(disp_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
+    static lv_color_t disp_buf_1[MY_DISP_BUF_LEN];
+    //static lv_color_t disp_buf_2[MY_DISP_BUF_LEN];
+    lv_display_set_buffers(disp, disp_buf_1, NULL, sizeof(disp_buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     /* Register callbacks. */
     lv_display_set_flush_cb(disp, disp_flush);
@@ -85,11 +81,16 @@ void disp_disable_update(void)
     disp_flush_enabled = false;
 }
 
+lv_display_t* disp_main_get(void)
+{
+    return disp;
+}
+
 /*Flush the content of the internal buffer the specific area on the display.
  *`px_map` contains the rendered image as raw pixel map and it should be copied to `area` on the display.
  *You can use DMA or any hardware acceleration to do this operation in the background but
  *'lv_display_flush_ready()' has to be called when it's finished.*/
-static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t * colors)
+static void disp_flush(lv_display_t* disp_drv, const lv_area_t* area, uint8_t* colors)
 {
     if(disp_flush_enabled) {
         ST7789_FillArea_Async(area->x1, area->y1, area->x2, area->y2, (uint16_t *)colors);
@@ -97,7 +98,7 @@ static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t 
 
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/
-    lv_display_flush_ready(disp_drv);
+    //lv_display_flush_ready(disp_drv);
 }
 
 #else /*Enable this file at the top*/
