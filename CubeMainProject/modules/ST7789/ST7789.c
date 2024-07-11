@@ -7,10 +7,6 @@
 
 #include "ST7789.h"
 
-extern SPI_HandleTypeDef hspi1;
-extern DMA_HandleTypeDef hdma_spi1_tx;
-/*=================================================================*/
-
 static void ST7789_WriteCommand(uint8_t command);
 static void ST7789_WriteData(uint16_t data);
 static void ST7789_WriteData8(uint8_t data);
@@ -74,13 +70,16 @@ void ST7789_GPIO_Init(void)
 {
     /* Init Pins for ST7789 driver. */
     GPIO_InitTypeDef  GPIO_InitStructure = {0};
-    GPIO_InitStructure.Pin = (ST7789_RST_PIN | ST7789_CS_PIN | ST7789_DC_PIN | ST7789_BLK_PIN);
+    GPIO_InitStructure.Pin = (ST7789_RST_PIN | ST7789_CS_PIN | ST7789_DC_PIN);
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    /* Set all pins in its default state (Plus enable blacklusght). */
-    HAL_GPIO_WritePin(GPIOA, (ST7789_RST_PIN | ST7789_DC_PIN | ST7789_BLK_PIN), GPIO_PIN_SET);
+	/* Start PWM */
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+
+    /* Set all pins in its default state + enable blacklusght). */
+    HAL_GPIO_WritePin(GPIOA, (ST7789_RST_PIN | ST7789_DC_PIN), GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOA, ST7789_CS_PIN, GPIO_PIN_RESET);
 }
 
@@ -191,7 +190,6 @@ void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_
 
 void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
 {
-	static volatile size_t ndtr = 0;
 	/* If data transfer already started ==> return */
 	if (data_transfer_finished == false)
 	{
@@ -225,6 +223,14 @@ void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
     }
 
 	data_transfer_finished = true;
+}
+
+void ST7789_SetLight(uint8_t light)
+{
+    if (light < 5) { light = 5; }
+    if (light > 100) {light = 100; }
+
+    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, light * (ST7789_BLK_PWM_PERIOD / 100));
 }
 
 bool ST7789_CheckTrasferFinished(void)

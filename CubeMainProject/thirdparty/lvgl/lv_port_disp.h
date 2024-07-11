@@ -50,11 +50,11 @@ void disp_enable_update(void);
 void disp_disable_update(void);
 
 /**
- * @brief 
+ * @brief This callback should be called in external modules to inform lvgl that
+ * low-level driver finished its job and new portion of data can be send
  * 
- * @return lv_display_t* 
  */
-lv_display_t* disp_main_get(void);
+void disp_flush_ready_cb(void);
 
 /**********************
  *      MACROS

@@ -6,6 +6,8 @@
  *  Initial release
  * @version 0.2:
  *  Now supports asyncronous data transfer using DMA.
+ * @version 0.3:
+ *  - Control BlackLight pin over PWM (brightness control added).
  * @date 2024-06-27
  * 
  * @copyright Copyright (c) 2024
@@ -15,8 +17,7 @@
 #ifndef ST7789_ST7789_H_
 #define ST7789_ST7789_H_
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
+#include "sys.h"
 
 #include <stdbool.h>
 
@@ -49,6 +50,9 @@
 #define ST7789_PTLAR   0x30     // 
 #define ST7789_COLMOD  0x3A     // Interface pixel format
 #define ST7789_MADCTL  0x36
+/*=================================================================*/
+
+#define ST7789_BLK_PWM_PERIOD   300
 /*=================================================================*/
 
 #define ST7789_CLK_PORT         GPIOB
@@ -88,6 +92,13 @@ void ST7789_Init(void);
 void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 void ST7789_FillArea_Async(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
 void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color);
+
+/**
+ * @brief Set Brightness of the LCD screen
+ * 
+ * @param light - brightness in percentage [5 - 100] 
+ */
+void ST7789_SetLight(uint8_t light);
 
 /**
  * @brief Check if ST7789 is BUSY transferring data.

@@ -63,6 +63,7 @@ static void disp_init(void)
 {
     ST7789_GPIO_Init();
     ST7789_Init();
+    ST7789_SetLight(100);
 }
 
 volatile bool disp_flush_enabled = true;
@@ -81,9 +82,10 @@ void disp_disable_update(void)
     disp_flush_enabled = false;
 }
 
-lv_display_t* disp_main_get(void)
+void disp_flush_ready_cb(void)
 {
-    return disp;
+    ST7789_Async_TxFinished_cb();
+    lv_display_flush_ready(disp);
 }
 
 /*Flush the content of the internal buffer the specific area on the display.
@@ -95,10 +97,6 @@ static void disp_flush(lv_display_t* disp_drv, const lv_area_t* area, uint8_t* c
     if(disp_flush_enabled) {
         ST7789_FillArea_Async(area->x1, area->y1, area->x2, area->y2, (uint16_t *)colors);
     }
-
-    /*IMPORTANT!!!
-     *Inform the graphics library that you are ready with the flushing*/
-    //lv_display_flush_ready(disp_drv);
 }
 
 #else /*Enable this file at the top*/
