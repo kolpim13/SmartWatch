@@ -227,8 +227,8 @@ void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
 
 void ST7789_SetLight(uint8_t light)
 {
-    if (light < 5) { light = 5; }
-    if (light > 100) {light = 100; }
+    if (light < 5) { light = 5; } 
+    if (light > 100) { light = 100; }
 
     __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, light * (ST7789_BLK_PWM_PERIOD / 100));
 }

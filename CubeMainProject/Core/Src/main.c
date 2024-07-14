@@ -543,10 +543,13 @@ void StartLvglTask(void const * argument)
 {
   /* USER CODE BEGIN StartLvglTask */
   uint8_t counter = 0;
+
+  /* Provide tick source to LVGL */
+  lv_tick_set_cb(HAL_GetTick);
   /* Infinite loop */
   for(;;)
   {
-	lv_tick_inc(5);
+	// lv_tick_inc(5);
 	lv_timer_handler();
     osDelay(5);
 
