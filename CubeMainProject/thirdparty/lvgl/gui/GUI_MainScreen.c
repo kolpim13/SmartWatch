@@ -1,8 +1,8 @@
 #include "GUI_MainScreen.h"
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
 
-extern RTC_HandleTypeDef hrtc;
+// LV_FONT_DEBROSEE_DIGITSONLY_40_DECLARE()
+
+extern const lv_font_t lv_font_debrosee_digitsonly_40;
 
 static lv_obj_t* time_lb = NULL;
 static lv_obj_t* date_lb = NULL;
@@ -58,28 +58,12 @@ lv_obj_t* GUI_MainScreen_Create(void)
     /* Screen */
     lv_obj_t* screen = lv_obj_create(NULL);
 
-    // lv_obj_t * cont;
-    // lv_obj_t * label;
-
-    // /* MENU */
-    // lv_obj_t* menu = lv_menu_create(screen);
-    // lv_obj_set_size(menu, lv_display_get_horizontal_resolution(NULL), lv_display_get_vertical_resolution(NULL));
-    // lv_obj_center(menu);
-
-    // lv_obj_t * main_page = lv_menu_page_create(menu, NULL);
-
-    // cont = lv_menu_cont_create(main_page);
-    // label = lv_label_create(cont);
-    // lv_label_set_text(label, "Item 1");
-
-    // lv_menu_set_page(menu, main_page);
-
     /* Label with time. */
     time_lb = lv_label_create(screen);
     lv_obj_set_width(time_lb, lv_display_get_horizontal_resolution(NULL) - 10);
     lv_obj_set_style_text_align(time_lb, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_font(time_lb, &lv_font_montserrat_40, 0);
-    lv_obj_align(time_lb, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_style_text_font(time_lb, &lv_font_debrosee_digitsonly_40, 0);
+    lv_obj_align(time_lb, LV_ALIGN_TOP_MID, 0, 20);
     lv_label_set_text(time_lb, "");
 
     // /* Label with date. */

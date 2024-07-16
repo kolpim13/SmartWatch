@@ -46,7 +46,7 @@ static void Menu_SettingsPageContent_TimeAndDate(lv_obj_t* content)
 
     lv_obj_t* calendar = lv_calendar_create(panel);
     lv_obj_set_width(calendar, lv_display_get_horizontal_resolution(NULL) - 20);
-    lv_obj_set_height(calendar, lv_display_get_horizontal_resolution(NULL) - 20);
+    lv_obj_set_height(calendar, lv_display_get_vertical_resolution(NULL) - 10);
     lv_calendar_header_dropdown_create(calendar);
 
     /* Add time selection */

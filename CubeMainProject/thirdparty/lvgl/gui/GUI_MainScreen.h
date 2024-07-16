@@ -15,8 +15,8 @@
 #ifndef _GUI_MAINSCREEN_H_
 #define _GUI_MAINSCREEN_H_
 
+#include "sys.h"
 #include "lvgl/lvgl.h"
-#include "stdbool.h"
 
 /**
  * @brief Create main screen
