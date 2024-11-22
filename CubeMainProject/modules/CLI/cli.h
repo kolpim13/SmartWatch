@@ -1,7 +1,7 @@
 /**
  * @file cli.h
  * @author Maksym Torhunakov (torgunakovmaks2@gmail.com)
- * @brief 
+ * @brief Module used for debug purposes.
  * @version 0.1 @date 2024-11-16 
  *  - Work bounded to the UART and it`s HAL implementation
  *  - Can only send data through UART | Receive was not implemented yet.
