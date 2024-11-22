@@ -22,20 +22,20 @@
  */
 
 #if HW_VERSION == HW_V1_0 || HW_VERSION == HW_V1_1
-#define DEBUG_PIN_0         GPIOA
-#define DEBUG_PIN_0_PORT    GPIO_PIN_12
+#define DEBUG_PIN_0         GPIO_PIN_12
+#define DEBUG_PIN_0_PORT    GPIOA
 
-#define DEBUG_PIN_1         GPIOA
-#define DEBUG_PIN_1_PORT    GPIO_PIN_11
+#define DEBUG_PIN_1         GPIO_PIN_11
+#define DEBUG_PIN_1_PORT    GPIOA
 
-#define DEBUG_PIN_2         GPIOB
-#define DEBUG_PIN_2_PORT    GPIO_PIN_15
+#define DEBUG_PIN_2         GPIO_PIN_15
+#define DEBUG_PIN_2_PORT    GPIOB
 
-#define DEBUG_PIN_3         GPIOB
-#define DEBUG_PIN_3_PORT    GPIO_PIN_14
+#define DEBUG_PIN_3         GPIO_PIN_14
+#define DEBUG_PIN_3_PORT    GPIOB
 
-#define DEBUG_PIN_4         GPIOB
-#define DEBUG_PIN_4_PORT    GPIO_PIN_13
+#define DEBUG_PIN_4         GPIO_PIN_13
+#define DEBUG_PIN_4_PORT    GPIOB
 #endif
 /*=================================================================*/
 
