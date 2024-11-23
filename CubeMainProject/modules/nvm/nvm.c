@@ -25,7 +25,7 @@ static inline NvM_Status_e NvM_Save(uint8_t address, uint8_t* data, size_t len)
     return NvM_Status_OK;
 }
 
-NvM_Status_e NvM_Save_AllData(void)
+NvM_Status_e NvM_Save_All(void)
 {
     return NvM_Save((uint8_t)0u, (uint8_t *)nvm_ram.data.raw_bytes, NvM_LEN);
 }
@@ -89,7 +89,7 @@ NvM_Status_e NvM_StartUp(void)
     /* Otherwise --> write default data to the nvm_ram and eeprom with calculated crc. */
     nvm_ram.validity.crc = crc;
     NvM_FillWithDefaultData();
-    NvM_Save_AllData();
+    NvM_Save_All();
     NvM_Save_Validity();
     /* Some checks on correctness previous actions should be added. */
 

@@ -92,10 +92,11 @@ extern NvM_Config_t nvm_ram;
 /*=================================================================*/
 
 /**
- * @brief Write default data into NvM RAM.
+ * @brief Save all data blocks (but not validity block) into eeprom.
  * 
+ * @return NvM_Status_e 
  */
-void NvM_FillWithDefaultData(void);
+NvM_Status_e NvM_Save_All(void);
 
 /**
  * @brief Save data about RTC in Eeprom.
@@ -114,13 +115,33 @@ NvM_Status_e NvM_Save_RTC(void);
 NvM_Status_e NvM_Save_Display(void);
 
 /**
- * @brief Read 
+ * @brief 
+ * 
+ * @return NvM_Status_OK - Operation successfull 
+ *  NvM_Status_Error - Operation failed
+ */
+NvM_Status_e NvM_Save_Validity(void);
+/*=================================================================*/
+
+/**
+ * @brief Write default data into NvM RAM.
+ * 
+ */
+void NvM_FillWithDefaultData(void);
+
+/**
+ * @brief Read all blocks (including validity).
  * 
  * @return NvM_Status_e 
  */
 NvM_Status_e NvM_Read_All(void);
 
-
+/**
+ * @brief Calculate crc for data only that is stored in eeprom.
+ * 
+ * @return uint32_t 
+ */
 uint32_t NvM_CalculateCRC(void);
+/*=================================================================*/
 
 #endif /* NvM_NvM_H_ */
