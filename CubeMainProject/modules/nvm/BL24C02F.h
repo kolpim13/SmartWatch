@@ -12,6 +12,7 @@
  * @todo:
  *  1. Add different options for read (sequentional and random access)
  *  2. Cover all driver related things into structure ==> Can be essential since up to 8 same chips can be set on 1 I2C.
+ *  3. Check function ResetI2C can be optimized [For example pin togling without ini and deinit I2C].
  */
 
 #ifndef NVM_BL24C02F_H_

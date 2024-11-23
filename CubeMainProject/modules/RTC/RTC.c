@@ -48,10 +48,9 @@ void RTC_Init(void)
     /* Read data from Eeprom and set them correspondingly */
     // Add check if eeprom data is valid and ready to be read
     // ...
-    NvM_config_t* nvm = NvM_GetConfig();
-    sTime.Hours = nvm->data.interpret.time.Hours;
-    sTime.Minutes = nvm->data.interpret.time.Minutes;
-    sTime.Seconds = nvm->data.interpret.time.Seconds;
+    sTime.Hours = nvm_ram.data.rtc.Time.Hours;
+    sTime.Minutes = nvm_ram.data.rtc.Time.Minutes;
+    sTime.Seconds = nvm_ram.data.rtc.Time.Seconds;
 
     /* SETUP RTC values */
     HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);

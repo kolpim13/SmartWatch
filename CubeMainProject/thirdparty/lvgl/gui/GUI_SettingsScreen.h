@@ -12,10 +12,8 @@
 #ifndef _GUI_SETTINGSSCREEN_H_
 #define _GUI_SETTINGSSCREEN_H_
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
+#include "sys.h"
 #include "lvgl/lvgl.h"
-#include "stdbool.h"
 
 lv_obj_t* GUI_SettingsScreen_Create(void);
 
