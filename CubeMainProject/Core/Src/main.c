@@ -31,6 +31,7 @@
 #include "BL24C02F.h"
 
 #include "cli.h"
+#include "debugPins.h"
 
 #include "lvgl/lvgl.h"
 #include "lvgl/lv_port_disp.h"
@@ -151,7 +152,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   POWER_GPIO_Init();
   POWER_ENABLE();
-  NvM_Read_All();
+  NvM_StartUp();
   RTC_Init();
   lv_init();
   lv_port_disp_init();
@@ -610,6 +611,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  DebugPins_GPIO_Init();
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -640,7 +643,7 @@ void StartEepromTask(void const * argument)
 		  {
 		      case NvM_Block_RTC:
 		      {
-		    	  NvM_Save_DateAndTime();
+		    	  NvM_Save_RTC();
 		    	  break;
 		      }
 		      default:
@@ -648,6 +651,10 @@ void StartEepromTask(void const * argument)
 		    	  break;
 		      }
 		  }
+
+		  /* After each block that should be saved --> calculate crc and save it also in NvM. */
+		  nvm_ram.validity.crc = NvM_CalculateCRC();
+		  NvM_Save_Validity();
 	  }
   }
   /* USER CODE END 5 */

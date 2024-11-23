@@ -1,7 +1,6 @@
 #include "GUI_SettingsScreen.h"
-#include "../nvm/nvm.h"
-#include <FreeRTOS.h>
-#include <queue.h>
+
+#include  "../modules/nvm/nvm.h"    /* Why should I add includes in a relative way? [Tested only in CubeIDE]*/
 
 extern RTC_HandleTypeDef hrtc;
 extern QueueHandle_t EepromQueueHandle;
@@ -113,10 +112,10 @@ static void event_TimeAndDate_BtnApply_cb(lv_event_t* event)
     uint8_t seconds = atoi(buf);
 
     /* Save it in eeprom */
-    nvm->data.interpret.time.Hours = hours;
-    nvm->data.interpret.time.Minutes = minutes;
-    nvm->data.interpret.time.Seconds = seconds;
-    NvM_Block_t block_type = NvM_Block_Time;
+    nvm_ram.data.rtc.Time.Hours = hours;
+    nvm_ram.data.rtc.Time.Minutes = minutes;
+    nvm_ram.data.rtc.Time.Seconds = seconds;
+    NvM_Block_t block_type = NvM_Block_RTC;
     if (xQueueSend (EepromQueueHandle,
                        (void *)&block_type,
                        (TickType_t)0) != pdPASS)
