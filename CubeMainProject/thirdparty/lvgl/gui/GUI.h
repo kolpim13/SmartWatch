@@ -15,7 +15,10 @@
 #include "lvgl/lvgl.h"
 #include "GUI_MainScreen.h"
 #include "GUI_SettingsScreen.h"
+/*=================================================================*/
 
 void GUI_Init(void);
+/*=================================================================*/
+
 
 #endif /* _LVGL_GUI_H_ */

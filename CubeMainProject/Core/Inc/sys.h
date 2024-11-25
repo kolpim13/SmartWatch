@@ -50,6 +50,7 @@ extern DMA_HandleTypeDef hdma_spi1_tx;
 extern TIM_HandleTypeDef htim3;
 extern CRC_HandleTypeDef hcrc;
 extern UART_HandleTypeDef huart1;
+extern RTC_HandleTypeDef hrtc;
 
 extern QueueHandle_t CliQueueHandle;
 /*=================================================================*/
