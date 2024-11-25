@@ -230,7 +230,13 @@ void ST7789_SetLight(uint8_t light)
     if (light < 5) { light = 5; } 
     if (light > 100) { light = 100; }
 
-    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, light * (ST7789_BLK_PWM_PERIOD / 100));
+    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, (uint16_t)(light * (ST7789_BLK_PWM_PERIOD / 100)));
+}
+
+uint8_t ST7789_GetLight(void)
+{
+	uint16_t raw_value = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
+	return (uint8_t)(raw_value / (ST7789_BLK_PWM_PERIOD / 100));
 }
 
 bool ST7789_CheckTrasferFinished(void)
