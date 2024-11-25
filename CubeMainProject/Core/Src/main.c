@@ -67,6 +67,7 @@ SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -78,6 +79,9 @@ osStaticThreadDef_t EepromTaskControlBlock;
 osThreadId LvglTaskHandle;
 uint32_t LvglTaskBuffer[ 2048 ];
 osStaticThreadDef_t LvglTaskControlBlock;
+osThreadId IdleTaskHandle;
+uint32_t IdleTaskBuffer[ 128 ];
+osStaticThreadDef_t IdleTaskControlBlock;
 osMessageQId EepromQueueHandle;
 uint8_t EepromQueueBuffer[ 16 * sizeof( uint8_t ) ];
 osStaticMessageQDef_t EepromQueueControlBlock;
@@ -100,8 +104,10 @@ static void MX_TIM3_Init(void);
 static void MX_CRC_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM11_Init(void);
 void StartEepromTask(void const * argument);
 void StartLvglTask(void const * argument);
+void StartIdleTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -149,6 +155,7 @@ int main(void)
   MX_CRC_Init();
   MX_I2C3_Init();
   MX_USART1_UART_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
   POWER_GPIO_Init();
   POWER_ENABLE();
@@ -194,6 +201,10 @@ int main(void)
   /* definition and creation of LvglTask */
   osThreadStaticDef(LvglTask, StartLvglTask, osPriorityNormal, 0, 2048, LvglTaskBuffer, &LvglTaskControlBlock);
   LvglTaskHandle = osThreadCreate(osThread(LvglTask), NULL);
+
+  /* definition and creation of IdleTask */
+  osThreadStaticDef(IdleTask, StartIdleTask, osPriorityIdle, 0, 128, IdleTaskBuffer, &IdleTaskControlBlock);
+  IdleTaskHandle = osThreadCreate(osThread(IdleTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -541,6 +552,37 @@ static void MX_TIM3_Init(void)
 }
 
 /**
+  * @brief TIM11 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM11_Init(void)
+{
+
+  /* USER CODE BEGIN TIM11_Init 0 */
+
+  /* USER CODE END TIM11_Init 0 */
+
+  /* USER CODE BEGIN TIM11_Init 1 */
+
+  /* USER CODE END TIM11_Init 1 */
+  htim11.Instance = TIM11;
+  htim11.Init.Prescaler = 9599;
+  htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim11.Init.Period = 4999;
+  htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM11_Init 2 */
+  HAL_TIM_Base_Start_IT(&htim11);
+  /* USER CODE END TIM11_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -679,7 +721,6 @@ void StartLvglTask(void const * argument)
   for(;;)
   {
 	lv_timer_handler();
-    vTaskDelay(1);
 
     counter++;
     if (counter == 100)
@@ -687,8 +728,30 @@ void StartLvglTask(void const * argument)
     	GUI_MainScreen_UpdateDateAndTime_Notify();
     	counter = 0;
     }
+
+    vTaskDelay(1);
   }
   /* USER CODE END StartLvglTask */
+}
+
+/* USER CODE BEGIN Header_StartIdleTask */
+/**
+* @brief Function implementing the IdleTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartIdleTask */
+void StartIdleTask(void const * argument)
+{
+  /* USER CODE BEGIN StartIdleTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	  /* Update Current Date and Time. */
+	  RTC_Cyclic_1s();
+	  vTaskDelay(1);
+  }
+  /* USER CODE END StartIdleTask */
 }
 
 /**
@@ -708,7 +771,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM11)
+  {
+    /* Notify that this is time to update RTC data. */
+	RTC_DateTimeUpdate_Notify();
+  }
   /* USER CODE END Callback 1 */
 }
 

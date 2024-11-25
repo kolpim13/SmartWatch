@@ -1,14 +1,14 @@
 /**
  * @file sys.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
- * @brief 
+ * @brief This module manages all standart includes, shared resources for the entire project.
+ * In addiction it should provide implementations for the system callbacks interrupt [such as timers, dma, communication, etc.].
  * @version 0.1 @date 2024-07-11
  * @version 0.2 @date 2024-11-22
  *  - HW Version added
  * 
  * 
  * 
- * @copyright Copyright (c) 2024
  * @todo 
  * 1. Add function to get absolut value of time passed since processor was enabled
  *      (in ms.)[Will be used by lvgl for tracking time for update purposes].
@@ -45,17 +45,20 @@
 
 /* SHARED RESOURCES AMOUNG PROJECT */
 extern RTC_HandleTypeDef hrtc;
+extern CRC_HandleTypeDef hcrc;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi1;
 extern DMA_HandleTypeDef hdma_spi1_tx;
-extern TIM_HandleTypeDef htim3;
-extern CRC_HandleTypeDef hcrc;
 extern UART_HandleTypeDef huart1;
-extern RTC_HandleTypeDef hrtc;
+extern DMA_HandleTypeDef hdma_usart1_tx;
+extern DMA_HandleTypeDef hdma_usart1_rx;
 
 extern QueueHandle_t CliQueueHandle;
 /*=================================================================*/
 
 /* DEFINE RESOURCES OF THE MACRO */
+#define TIM_RTC         htim11
 #define UART_CLI        huart1
 /*=================================================================*/
 

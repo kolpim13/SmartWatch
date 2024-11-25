@@ -9,10 +9,10 @@
  *  - Now RTC use internal variables to store 
  *  - Define RTC_TIME_FORMAT introduced to unify time format accross the project
  * 
- * 
  * @copyright Copyright (c) 2024
  * 
- * @todo Try to store data in Binary format for more easy readout.
+ * @todo Perform tests on different data formats to understand wich is better (faster, consumes less resources).
+ * @todo Add some syncronization mechanizm to the module, so wont be any rase conditions.
  */
 
 #ifndef RTC_RTC_H_
@@ -45,6 +45,40 @@ void RTC_Init(void);
  *  Try to think how to optimize these operations.
  */
 void RTC_Cyclic_1s(void);
+
+/**
+ * @brief 
+ * 
+ */
+void RTC_DateTimeUpdate_Notify(void);
+
+/**
+ * @brief 
+ * 
+ * @param time 
+ */
+void RTC_SetTime(const RTC_TimeTypeDef* const time);
+
+/**
+ * @brief 
+ * 
+ * @param time 
+ */
+void RTC_SetDate(const RTC_DateTypeDef* const date);
+
+/**
+ * @brief 
+ * 
+ * @return const RTC_TimeTypeDef* 
+ */
+const RTC_TimeTypeDef* RTC_GetTime(void);
+
+/**
+ * @brief 
+ * 
+ * @return const RTC_TimeTypeDef* 
+ */
+const RTC_DateTypeDef* RTC_GetDate(void);
 /*=================================================================*/
 
 
