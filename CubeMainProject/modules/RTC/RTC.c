@@ -65,6 +65,7 @@ void RTC_Cyclic_1s(void)
     /* Get current time and date */
     if (notify_date_time_update == true)
     {
+    	notify_date_time_update = false;
         HAL_RTC_GetTime(&hrtc, &sTime, RTC_TIME_FORMAT);
         HAL_RTC_GetDate(&hrtc, &sDate, RTC_TIME_FORMAT);
     }

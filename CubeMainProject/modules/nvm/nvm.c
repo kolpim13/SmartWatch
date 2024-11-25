@@ -46,15 +46,6 @@ NvM_Status_e NvM_Save_Validity(void)
 }
 /*=================================================================*/
 
-void NvM_FillWithDefaultData(void)
-{
-    /* Set date and time to "0" */
-    memset((void *)&nvm_ram.data.rtc, 0, sizeof(NvM_Block_RTC_t));
-
-    nvm_ram.data.display.brightness_pc = 100;
-    memset((void *)nvm_ram.data.display.reserved, 0, sizeof(nvm_ram.data.display.reserved));
-}
-
 NvM_Status_e NvM_StartUp(void)
 {
     NvM_Status_e status = NvM_Status_OK;
@@ -94,6 +85,15 @@ NvM_Status_e NvM_StartUp(void)
     /* Some checks on correctness previous actions should be added. */
 
     return NvM_Status_OK;
+}
+
+void NvM_FillWithDefaultData(void)
+{
+    /* Set date and time to "0" */
+    memset((void *)&nvm_ram.data.rtc, 0, sizeof(NvM_Block_RTC_t));
+
+    nvm_ram.data.display.brightness_pc = 100;
+    memset((void *)nvm_ram.data.display.reserved, 0, sizeof(nvm_ram.data.display.reserved));
 }
 
 NvM_Status_e NvM_Read_All(void)
