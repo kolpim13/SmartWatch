@@ -53,6 +53,6 @@ void RTC_Init(void)
     sTime.Seconds = nvm_ram.data.rtc.Time.Seconds;
 
     /* SETUP RTC values */
-    HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-    HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+    HAL_RTC_SetTime(&hrtc, &sTime, RTC_TIME_FORMAT);
+    HAL_RTC_SetDate(&hrtc, &sDate, RTC_TIME_FORMAT);
 }
