@@ -1,0 +1,20 @@
+#if RTC_TIME_FORMAT == RTC_TIME_FORMAT_BIN
+#if 0 /* Method 1. */
+lv_snprintf(
+    str_out, sizeof(str_out), "%02u:%02u:%02u",
+    (((time->Hours / 16) * 10) + (time->Hours % 16)),
+    (((time->Minutes / 16) * 10) + (time->Minutes % 16)),
+    (((time->Seconds / 16) * 10) + (time->Seconds % 16))
+);
+#elif 1 /* Method 2 */
+lv_snprintf(
+    str_out, sizeof(str_out), "%1u%1u:%1u%1u:%1u%1u",
+    ((time->Hours >> 4) & 0x0F), ((time->Hours) & 0xF0),
+    ((time->Minutes >> 4) & 0x0F), ((time->Minutes) & 0xF0),
+    ((time->Seconds >> 4) & 0x0F), ((time->Seconds) & 0xF0)
+);
+#endif
+
+#elif RTC_TIME_FORMAT == RTC_TIME_FORMAT_BCD
+
+#endif
