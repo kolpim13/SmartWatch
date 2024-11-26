@@ -1,14 +1,14 @@
 #include "RTC.h"
 #include "nvm.h"
+/*=================================================================*/
 
-extern RTC_HandleTypeDef hrtc;
+static volatile bool notify_date_time_update = false;
+static volatile RTC_TimeTypeDef sTime = {0};
+static volatile RTC_DateTypeDef sDate = {0};
 /*=================================================================*/
 
 void RTC_Init(void)
 {
-    RTC_TimeTypeDef sTime = {0};
-    RTC_DateTypeDef sDate = {0};
-
     /* Initialize RTC */
     hrtc.Instance = RTC;
     hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
@@ -53,6 +53,46 @@ void RTC_Init(void)
     sTime.Seconds = nvm_ram.data.rtc.Time.Seconds;
 
     /* SETUP RTC values */
-    HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-    HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+    HAL_RTC_SetTime(&hrtc, &sTime, RTC_TIME_FORMAT);
+    HAL_RTC_SetDate(&hrtc, &sDate, RTC_TIME_FORMAT);
 }
+
+void RTC_Cyclic_1s(void)
+{
+    static RTC_TimeTypeDef sTime_new = {0};
+    static RTC_DateTypeDef sDate_new = {0};
+
+    /* Get current time and date */
+    if (notify_date_time_update == true)
+    {
+    	notify_date_time_update = false;
+        HAL_RTC_GetTime(&hrtc, &sTime, RTC_TIME_FORMAT);
+        HAL_RTC_GetDate(&hrtc, &sDate, RTC_TIME_FORMAT);
+    }
+}
+
+void RTC_DateTimeUpdate_Notify(void)
+{
+    notify_date_time_update = true;
+}
+
+void RTC_SetTime(const RTC_TimeTypeDef* const time)
+{
+    sTime = *time;
+}
+
+void RTC_SetDate(const RTC_DateTypeDef* const date)
+{
+    sDate = *date;
+}
+
+const RTC_TimeTypeDef* RTC_GetTime(void)
+{
+    return (const RTC_TimeTypeDef*)&sTime;
+}
+
+const RTC_DateTypeDef* RTC_GetDate(void)
+{
+    return (const RTC_DateTypeDef*)&sDate;
+}
+/*=================================================================*/

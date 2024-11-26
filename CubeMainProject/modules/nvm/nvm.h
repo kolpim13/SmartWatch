@@ -124,6 +124,13 @@ NvM_Status_e NvM_Save_Validity(void);
 /*=================================================================*/
 
 /**
+ * @brief This function should be ran on the startup of the ECU.
+ * 
+ * @return NvM_Status_e 
+ */
+NvM_Status_e NvM_StartUp(void);
+
+/**
  * @brief Write default data into NvM RAM.
  * 
  */
