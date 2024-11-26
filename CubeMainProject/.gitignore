@@ -1,4 +1,4 @@
-.settings
-Drivers
-Debug
+.settings/
+Drivers/
+Debug/
 thirdparty/lvgl/src

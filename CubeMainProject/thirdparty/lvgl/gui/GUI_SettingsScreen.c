@@ -96,7 +96,6 @@ static void event_TimeAndDate_BtnApply_cb(lv_event_t* event)
         return;
     }
 
-    NvM_config_t* nvm = NvM_GetConfig();
     RTC_TimeTypeDef sTime = {0};
     RTC_DateTypeDef sDate = {0};
     HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);

@@ -2,13 +2,17 @@
  * @file ST7789.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
  * @brief LCD TFT low level driver.
- * @version 0.1
+ * @version 0.1 @date 2024-06-27
  *  Initial release
+ * 
  * @version 0.2:
  *  Now supports asyncronous data transfer using DMA.
+ * 
  * @version 0.3:
  *  - Control BlackLight pin over PWM (brightness control added).
- * @date 2024-06-27
+ * 
+ * @version 0.4:
+ *  - Interface for reading current blacklight state added. 
  * 
  * @copyright Copyright (c) 2024
  * 
@@ -18,8 +22,6 @@
 #define ST7789_ST7789_H_
 
 #include "sys.h"
-
-#include <stdbool.h>
 
 /* LCD physical parameters */
 #define ST7789_LCD_WIDTH    240
@@ -99,6 +101,13 @@ void ST7789_FillArea_PixelByPixel(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
  * @param light - brightness in percentage [5 - 100] 
  */
 void ST7789_SetLight(uint8_t light);
+
+/**
+ * @brief Get Current Brightnees of the LCD screen
+ * 
+ * @return uint8_t - light in percentage [0 - 100] 
+ */
+uint8_t ST7789_GetLight(void);
 
 /**
  * @brief Check if ST7789 is BUSY transferring data.

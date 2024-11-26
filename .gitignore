@@ -1,9 +1,6 @@
-CubeMainProject/.settings
-CubeMainProject/Debug/**
-CubeMainProject\Debug\**
-CubeMainProject/thirdparty/lvgl/src
-Debug/**
-Debug\**
+CubeMainProject/.settings/
+CubeMainProject/Debug/
+CubeMainProject/thirdparty/lvgl/src/
 
 */*.list
 */*.mk

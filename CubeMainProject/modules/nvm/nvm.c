@@ -3,6 +3,14 @@
 NvM_Config_t nvm_ram;
 /*=================================================================*/
 
+/**
+ * @brief 
+ * 
+ * @param address 
+ * @param data 
+ * @param len 
+ * @return NvM_Status_e 
+ */
 static NvM_Status_e NvM_Save(uint8_t address, uint8_t* data, size_t len);
 /*=================================================================*/
 
