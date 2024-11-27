@@ -717,6 +717,11 @@ void StartLvglTask(void const * argument)
   /* Provide tick source to LVGL */
   lv_tick_set_cb(HAL_GetTick);
 
+  /* Create timers:
+   * 1. Status Bar content update. */
+  lv_timer_t* timer_statusBar = lv_timer_create(timer_statusBar_update, 500, NULL);
+  lv_timer_ready(timer_statusBar);
+
   /* Infinite loop */
   for(;;)
   {

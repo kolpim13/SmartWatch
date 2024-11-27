@@ -17,12 +17,16 @@ void GUI_StatusBar_Create(void)
     status_bar = lv_obj_create(lv_layer_top());
     lv_obj_set_size(status_bar, LV_HOR_RES, 30);      
     lv_obj_align(status_bar, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_scrollbar_mode(status_bar, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_clear_flag(status_bar, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_opa(status_bar, LV_OPA_TRANSP, 0);      // Make the background fully transparent
+    lv_obj_set_style_border_opa(status_bar, LV_OPA_TRANSP, 0);  // Make the border fully transparent
 
     /* Widget for current time. 
     Aligned to very left of the status bar. */
     time_label = lv_label_create(status_bar);
-    lv_label_set_text(time_label, "00:00")                      // Initial time
-    lv_obj_align(time_label, NULL, LV_ALIGN_LEFT_MID, 10, 0);   // Align to very left
+    lv_label_set_text(time_label, "00:00");                     // Initial time
+    lv_obj_align(time_label, LV_ALIGN_LEFT_MID, 10, 0);   // Align to very left
 
     /* Widget for battery status.
     Implemented as a bar. 
@@ -30,11 +34,10 @@ void GUI_StatusBar_Create(void)
     lv_obj_t* battery_bar = lv_bar_create(status_bar);
     lv_bar_set_range(battery_bar, 0, 100);                  
     lv_bar_set_value(battery_bar, 100, LV_ANIM_OFF);
-    lv_bar_set_mode(battery_bar, LV_BAR_MODE_NORMAL);      
-    lv_bar_set_orientation(battery_bar, LV_BAR_ORIENTATION_HORIZONTAL);
+    lv_bar_set_mode(battery_bar, LV_BAR_MODE_NORMAL);
 
     lv_obj_align(battery_bar, LV_ALIGN_RIGHT_MID, -10, 0);
-    lv_obj_set_size(battery_bar, 100, 20);                  // (?) Width x Height of the bar
+    lv_obj_set_size(battery_bar, 50, 20);                  // (?) Width x Height of the bar
 
     /* Specific font should be added. [Small size and digits + ": ; . , #" only]*/
     battery_label = lv_label_create(battery_bar);
