@@ -9,6 +9,9 @@
  *  - Now RTC use internal variables to store 
  *  - Define RTC_TIME_FORMAT introduced to unify time format accross the project
  * 
+ * @version 0.3 @date 204-11-27
+ *  - Conversion BCD <--> Byte added.
+ * 
  * @copyright Copyright (c) 2024
  * 
  * @todo Perform tests on different data formats to understand wich is better (faster, consumes less resources).
@@ -27,6 +30,10 @@
 #define RTC_TIME_FORMAT_BIN         RTC_FORMAT_BIN
 #define RTC_TIME_FORMAT_BCD         RTC_FORMAT_BCD
 #define RTC_TIME_FORMAT             RTC_TIME_FORMAT_BCD
+/*=================================================================*/
+
+#define RTC_BCDtoByte(bcd)          RTC_Bcd2ToByte(bcd)
+#define RTC_ByteToBCD(byte)         RTC_ByteToBcd2(byte)
 /*=================================================================*/
 
 /**
