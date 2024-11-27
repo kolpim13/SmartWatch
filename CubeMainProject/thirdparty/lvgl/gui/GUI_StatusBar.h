@@ -37,7 +37,7 @@ void GUI_StatusBar_Create();
  * @link https://docs.lvgl.io/9.1/overview/timer.html
  * 
  * @example 
- * lv_timer_t* timer = lv_timer_create(GUI_StatusBar_Update_Cyclic_10s, 500, &user_data);
+ * lv_timer_t* timer = lv_timer_create(GUI_StatusBar_Update_Cyclic_1s, 500, &user_data);
  * lv_timer_enable(timer)
  * 
  */

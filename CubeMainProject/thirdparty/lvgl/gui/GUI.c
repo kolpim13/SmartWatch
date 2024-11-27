@@ -42,11 +42,15 @@ static void event_screen_navigation_gesture(lv_event_t* event)
 
 void GUI_Init(void)
 {
-    screen_main = GUI_MainScreen_Create();
-    screen_settings = GUI_SettingsScreen_Create();
+    screen_main = GUI_MainScreen_Create(); //GUI_ScreenMain_Create();
     lv_screen_load(screen_main);
+	GUI_StatusBar_Create();
+}
+/*=================================================================*/
 
-    /* Navigation between screens. */
-    lv_obj_add_event_cb(screen_main, event_screen_navigation_gesture, LV_EVENT_GESTURE, NULL);
-    lv_obj_add_event_cb(screen_settings, event_screen_navigation_gesture, LV_EVENT_GESTURE, NULL);
+/* LVGL TIMERS */
+void timer_statusBar_update(lv_timer_t* timer)
+{
+	(void)timer;
+	GUI_StatusBar_Update_Cyclic_1s();
 }
