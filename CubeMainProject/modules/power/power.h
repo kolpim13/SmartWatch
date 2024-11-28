@@ -2,8 +2,11 @@
  * @file power.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
  * @brief This module manages power 
- * @version 0.1
- * @date 2024-07-07
+ * @version 0.1 @date 2024-07-07
+ *  - Place holder for module added.
+ * 
+ * @version 0.2 @date 2024-11-28
+ *  - 
  * 
  * @copyright Copyright (c) 2024
  * 
