@@ -16,15 +16,40 @@
 #define _POWER_POWER_H_
 
 #include "sys.h"
-
-#define POWER_EN_PORT         GPIOA
-#define POWER_EN_PIN          GPIO_PIN_4
 /*=================================================================*/
 
-#define POWER_ENABLE()        HAL_GPIO_WritePin(POWER_EN_PORT, POWER_EN_PIN, GPIO_PIN_SET)
-#define POWER_DISABLE()       HAL_GPIO_WritePin(POWER_EN_PORT, POWER_EN_PIN, GPIO_PIN_RESET)       
+#define PWR_EN_PORT         GPIOA
+#define PWR_EN_PIN          GPIO_PIN_4
+
+#define PWR_CHARGE_PORT     GPIOA
+#define PWR_CHARGE_PIN      GPIO_PIN_3
 /*=================================================================*/
 
-void POWER_GPIO_Init(void);
+#define PWR_ENABLE()        HAL_GPIO_WritePin(PWR_EN_PORT, PWR_EN_PIN, GPIO_PIN_SET)
+#define PWR_DISABLE()       HAL_GPIO_WritePin(PWR_EN_PORT, PWR_EN_PIN, GPIO_PIN_RESET)       
+/*=================================================================*/
+
+void PWR_GPIO_Init(void);
+
+/**
+ * @brief 
+ * 
+ * @return true --> battery is charging at the moment.
+ * @return false --> battery is not charging.
+ */
+bool PWR_IsChangeActive(void);
+
+/**
+ * @brief TBD
+ * 
+ */
+void PWR_SleepMode_Enter(void);
+
+/**
+ * @brief TBD
+ * 
+ */
+void PWR_SleepMode_Exit(void);
+/*=================================================================*/
 
 #endif //_POWER_POWER_H_
