@@ -7,6 +7,9 @@
  * @version 0.1 @date 2024-11-27
  *  - Status bar created. Only current time is updated.
  * 
+ * @version 0.2 @date 2024-11-30
+ *  - Logic of timer to update status bar was moved inside this file. 
+ * 
  * 
  * @todo Change text color [black <--> white] based on the background color
  * @todo 
@@ -29,19 +32,6 @@
  * 
  */
 void GUI_StatusBar_Create();
-
-/**
- * @brief Updates information located in the status bar.
- * Should be called periodically. Proposal is to place it inside lvgl_timer
- * 
- * @link https://docs.lvgl.io/9.1/overview/timer.html
- * 
- * @example 
- * lv_timer_t* timer = lv_timer_create(GUI_StatusBar_Update_Cyclic_1s, 500, &user_data);
- * lv_timer_enable(timer)
- * 
- */
-void GUI_StatusBar_Update_Cyclic_1s(void);
 /*=================================================================*/
 
 #endif //_GUI_STATUSBAR_H_

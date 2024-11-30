@@ -5,6 +5,38 @@
 static lv_obj_t* status_bar = NULL;
 static lv_obj_t* time_label;
 static lv_obj_t* battery_label;
+static lv_obj_t* update_timer = NULL;
+/*=================================================================*/
+
+/**
+ * @brief Update all info on status bar.
+ * Non-reentrant
+ * Should be called periodically.
+ */
+static void update_status_bar_1s(void);
+/*=================================================================*/
+
+static void update_status_bar_1s(void)
+{
+    static RTC_TimeTypeDef time_prev = {0};
+
+    /* Get current date and time*/
+    const RTC_TimeTypeDef* time = RTC_GetTime();
+
+    /* If seconds differ --> Update time label */
+    if (time->Minutes != time_prev.Minutes)
+    {
+        time_prev = *time;
+        lv_label_set_text_fmt(
+            time_label, "%02u:%02u",
+            RTC_BCDtoByte(time->Hours), 
+            RTC_BCDtoByte(time->Minutes)
+        );
+    }
+
+    /* Update battery bar */
+    // ... When power indication will be working nice.
+}
 /*=================================================================*/
 
 void GUI_StatusBar_Create(void)
@@ -43,27 +75,11 @@ void GUI_StatusBar_Create(void)
     battery_label = lv_label_create(battery_bar);
     lv_label_set_text(battery_label, "100");
     lv_obj_align(battery_label, LV_ALIGN_CENTER, 0, 0);  // Center the label inside the bar
-}
 
-void GUI_StatusBar_Update_Cyclic_1s(void)
-{
-    static RTC_TimeTypeDef time_prev = {0};
-
-    /* Get current date and time*/
-    const RTC_TimeTypeDef* time = RTC_GetTime();
-
-    /* If seconds differ --> Update time label */
-    if (time->Minutes != time_prev.Minutes)
-    {
-        time_prev = *time;
-        lv_label_set_text_fmt(
-            time_label, "%02u:%02u",
-            RTC_BCDtoByte(time->Hours), 
-            RTC_BCDtoByte(time->Minutes)
-        );
-    }
-
-    /* Update battery bar */
-    // ... When power indication will be working nice.
+    /* Update timer */
+    update_timer = lv_timer_create_basic();
+    lv_timer_set_cb(update_timer, update_status_bar_1s);
+    lv_timer_set_period(update_timer, 500);
+    lv_timer_ready(update_timer);
 }
 /*=================================================================*/

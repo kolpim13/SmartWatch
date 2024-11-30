@@ -712,28 +712,14 @@ void StartEepromTask(void const * argument)
 void StartLvglTask(void const * argument)
 {
   /* USER CODE BEGIN StartLvglTask */
-  uint8_t counter = 0;
 
   /* Provide tick source to LVGL */
   lv_tick_set_cb(HAL_GetTick);
-
-  /* Create timers:
-   * 1. Status Bar content update. */
-  lv_timer_t* timer_statusBar = lv_timer_create(timer_statusBar_update, 500, NULL);
-  lv_timer_ready(timer_statusBar);
 
   /* Infinite loop */
   for(;;)
   {
 	lv_timer_handler();
-
-    counter++;
-    if (counter == 100)
-    {
-    	GUI_MainScreen_UpdateDateAndTime_Notify();
-    	counter = 0;
-    }
-
     vTaskDelay(1);
   }
   /* USER CODE END StartLvglTask */
