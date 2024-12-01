@@ -1,7 +1,7 @@
 /**
  * @file power.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
- * @brief This module manages power 
+ * @brief This module manages power.
  * @version 0.1
  * @date 2024-07-07
  * 
@@ -14,14 +14,26 @@
 
 #include "sys.h"
 
-#define POWER_EN_PORT         GPIOA
-#define POWER_EN_PIN          GPIO_PIN_4
+#define PWR_EN_PORT         GPIOA
+#define PWR_EN_PIN          GPIO_PIN_4
+
+#define PWR_CHARGE_PORT     GPIOA
+#define PWR_CHARGE_PIN      GPIO_PIN_3
 /*=================================================================*/
 
-#define POWER_ENABLE()        HAL_GPIO_WritePin(POWER_EN_PORT, POWER_EN_PIN, GPIO_PIN_SET)
-#define POWER_DISABLE()       HAL_GPIO_WritePin(POWER_EN_PORT, POWER_EN_PIN, GPIO_PIN_RESET)       
+#define PWR_ENABLE()        HAL_GPIO_WritePin(PWR_EN_PORT, PWR_EN_PIN, GPIO_PIN_SET)
+#define PWR_DISABLE()       HAL_GPIO_WritePin(PWR_EN_PORT, PWR_EN_PIN, GPIO_PIN_RESET)       
 /*=================================================================*/
 
-void POWER_GPIO_Init(void);
+void PWR_GPIO_Init(void);
+
+/**
+ * @brief 
+ * 
+ * @return true --> battery is charging at the moment.
+ * @return false --> battery is not charging.
+ */
+bool PWR_IsChargeActive(void);
+/*=================================================================*/
 
 #endif //_POWER_POWER_H_

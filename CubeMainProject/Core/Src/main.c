@@ -157,8 +157,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
-  POWER_GPIO_Init();
-  POWER_ENABLE();
+  PWR_GPIO_Init();
+  PWR_ENABLE();
   NvM_StartUp();
   RTC_Init();
   lv_init();
