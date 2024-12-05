@@ -55,3 +55,13 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 /*=================================================================*/
+
+void SYS_Build_Init(void)
+{
+    #if SW_BUILD == SW_BUILD_DEBUG
+    DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;		/* IWDG is stopped when main core is halted. */
+    #else
+    return;
+    #endif
+}
+/*=================================================================*/
