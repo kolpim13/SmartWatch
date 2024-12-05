@@ -1,12 +1,20 @@
 /**
  * @file power.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
- * @brief This module manages power 
+ * @brief This is a power manager.
+ * It responsible for Low Power and Sleep modes, battery status and control.
+ * In Low power mode device remain active but slightly reduce its power consumption:
+ *  - Main core and all peripheral remain active.
+ *  - All sensors works without changes.
+ *  - Display is disabled + LVGL task is not halted.
+ *  - Touch controller is in standby mode --> Device can be waken via touching it.
+ *  - Main frequency slightly decreased (?) [Since the most computationally consuming part (LVGL) is not active].
+ * 
  * @version 0.1 @date 2024-07-07
  *  - Place holder for module added.
  * 
  * @version 0.2 @date 2024-11-28
- *  - 
+ *  - Low power mode introduced
  * 
  * @copyright Copyright (c) 2024
  * 
@@ -16,7 +24,6 @@
 #define _POWER_POWER_H_
 
 #include "sys.h"
-/*=================================================================*/
 
 #define PWR_EN_PORT         GPIOA
 #define PWR_EN_PIN          GPIO_PIN_4
@@ -37,7 +44,19 @@ void PWR_GPIO_Init(void);
  * @return true --> battery is charging at the moment.
  * @return false --> battery is not charging.
  */
-bool PWR_IsChangeActive(void);
+bool PWR_IsChargeActive(void);
+
+/**
+ * @brief 
+ * 
+ */
+void PWR_LowPowerMode_Enter(void);
+
+/**
+ * @brief 
+ * 
+ */
+void PWR_LowPowerMode_Exit(void);
 
 /**
  * @brief TBD
