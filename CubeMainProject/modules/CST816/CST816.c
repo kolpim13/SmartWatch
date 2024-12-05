@@ -60,6 +60,9 @@ void CST816_Init(void)
 {
     CST816_GPIO_Init();
 	CST816_Config_AutoSleepTime(5);
+
+    /* To enable chip. */
+    CST816_RST_Set();
 }
 
 void CST816_Reset(void)

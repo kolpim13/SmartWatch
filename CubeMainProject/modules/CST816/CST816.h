@@ -14,7 +14,7 @@
  *  And what is exact difference.
  * 2. Test somehow sleep mode | wakeup.
  * 3. Add Low power mode: faster entering standby mode, lower frequency, etc.
- * 
+ * 4. Add Some DBG / INFO information: Chip ID, Version, etc.
  */
 
 #include "sys.h"
