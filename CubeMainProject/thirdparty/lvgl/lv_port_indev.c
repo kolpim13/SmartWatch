@@ -27,7 +27,6 @@
 static void touchpad_init(void);
 static void touchpad_read(lv_indev_t * indev, lv_indev_data_t * data);
 static bool touchpad_is_pressed(void);
-static void touchpad_get_xy(int32_t * x, int32_t * y);
 
 /**********************
  *  STATIC VARIABLES
@@ -80,6 +79,16 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
     static uint16_t last_y = 0;
 
     /*Save the pressed coordinates and the state*/
+    if (CST816_Touch_and_AxisXY(&last_x, &last_y) == true)
+    {
+        data->state = LV_INDEV_STATE_PR;
+    }
+    else
+    {
+        data->state = LV_INDEV_STATE_REL;
+    }
+
+    /* Old way --> compare with new one in terms of speed.
     if (touchpad_is_pressed() == true)
     {
         CST816_GetAxis_XY(&last_x, &last_y);
@@ -88,6 +97,7 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
     else {
         data->state = LV_INDEV_STATE_REL;
     }
+    */
 
     /*Set the last pressed coordinates*/
     data->point.x = (int32_t)last_x;
@@ -98,22 +108,7 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 static bool touchpad_is_pressed(void)
 {
     /*Your code comes here*/
-    uint8_t fingers = CST816_GetNumOfFingers();
-    if (fingers != 0x00 && fingers  != 0xFF)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-/*Get the x and y coordinates if the touchpad is pressed*/
-static void touchpad_get_xy(int32_t * x, int32_t * y)
-{
-    /*Your code comes here*/
-
-    (*x) = 0;
-    (*y) = 0;
+    return CST816_IsTouch();
 }
 
 #else /*Enable this file at the top*/

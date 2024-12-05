@@ -57,7 +57,6 @@
 extern RTC_HandleTypeDef hrtc;
 extern CRC_HandleTypeDef hcrc;
 extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi1;
 extern DMA_HandleTypeDef hdma_spi1_tx;
@@ -69,7 +68,7 @@ extern QueueHandle_t CliQueueHandle;
 /*=================================================================*/
 
 /* DEFINE RESOURCES OF THE MACRO */
-#define TIM_PWR         htim10
+#define TIM_PWR         htim11
 #define TIM_RTC         htim11
 #define UART_CLI        huart1
 /*=================================================================*/

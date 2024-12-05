@@ -107,6 +107,7 @@ static void MX_CRC_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM11_Init(void);
+static void MX_IWDG_Init(void);
 void StartEepromTask(void const * argument);
 void StartLvglTask(void const * argument);
 void StartIdleTask(void const * argument);
@@ -158,7 +159,6 @@ int main(void)
   MX_I2C3_Init();
   MX_USART1_UART_Init();
   MX_TIM11_Init();
-  MX_TIM10_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   PWR_GPIO_Init();
@@ -680,6 +680,7 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
@@ -687,6 +688,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin : PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
   DebugPins_GPIO_Init();
@@ -796,16 +807,24 @@ void StartIdleTask(void const * argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+  static size_t pwr_counter = 0;
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM9) {
     HAL_IncTick();
   }
-  /* USER CODE BEGIN Callback 1 */
+
   if (htim->Instance == TIM11)
   {
     /* Notify that this is time to update RTC data. */
-	RTC_DateTimeUpdate_Notify();
+    RTC_DateTimeUpdate_Notify();
+
+    /* Update time for PWR manager. */
+    pwr_counter++;
+    if (pwr_counter == 2)
+    {
+      // ...
+      pwr_counter = 0;
+    }
   }
   /* USER CODE END Callback 1 */
 }
