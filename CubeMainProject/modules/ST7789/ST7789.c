@@ -6,6 +6,7 @@
  */
 
 #include "ST7789.h"
+#include "nvm.h"
 
 static void ST7789_WriteCommand(uint8_t command);
 static void ST7789_WriteData(uint16_t data);
@@ -166,7 +167,9 @@ void ST7789_Init(void)
 
 	ST7789_WriteCommand(ST7789_INVON); 
 
-	ST7789_WriteCommand(ST7789_DISPON); 
+	ST7789_WriteCommand(ST7789_DISPON);
+
+	ST7789_SetLight(nvm_ram.data.display.brightness_pc);
 }
 
 void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)

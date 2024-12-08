@@ -65,6 +65,7 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 
 extern QueueHandle_t CliQueueHandle;
+extern QueueHandle_t EepromQueueHandle;
 /*=================================================================*/
 
 /* DEFINE RESOURCES OF THE MACRO */

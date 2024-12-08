@@ -63,7 +63,6 @@ static void disp_init(void)
 {
     ST7789_GPIO_Init();
     ST7789_Init();
-    ST7789_SetLight(100);
 }
 
 volatile bool disp_flush_enabled = true;
