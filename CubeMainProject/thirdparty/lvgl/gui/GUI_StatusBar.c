@@ -74,6 +74,7 @@ static lv_obj_t* battery_bar_create()
 static void update_status_bar_1s(void)
 {
     static RTC_TimeTypeDef time_prev = {0};
+    static bool charge_active_prev = false;
 
     /* Get current date and time*/
     const RTC_TimeTypeDef* time = RTC_GetTime();
@@ -90,18 +91,23 @@ static void update_status_bar_1s(void)
     }
 
     /* Update battery bar.
-    Percentage of the charge is not implemented yet. */
+    Percentage of the charge is not implemented yet (for bith HW and SW). */
     // ...
-
-    /* If charge connected --> make battery bar green */
-    if (PWR_IsChargeActive() == true)
+    
+    /* Get state of the charge. */
+    bool charge_active = PWR_IsChargeActive();
+    if (charge_active != charge_active_prev)
     {
-        lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GREEN_LIGHT(), LV_PART_INDICATOR);
-    }
-    /* If not --> Return light gray color. */
-    else
-    {
-        lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GRAY_LIGHT(), LV_PART_INDICATOR);
+        /* If charge connected --> make battery bar green */
+        if (charge_active == true)
+        {
+            lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GREEN_LIGHT(), LV_PART_INDICATOR);
+        }
+        /* If not --> Return light gray color. */
+        else
+        {
+            lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GRAY_LIGHT(), LV_PART_INDICATOR);
+        }
     }
 }
 /*=================================================================*/
