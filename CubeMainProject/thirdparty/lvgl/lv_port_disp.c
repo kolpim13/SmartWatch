@@ -13,7 +13,10 @@
  *********************/
 #define MY_DISP_HOR_RES    ST7789_LCD_WIDTH
 #define MY_DISP_VER_RES    ST7789_LCD_HEIGHT
-#define MY_DISP_BUF_LEN    ((ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 10)
+// #define MY_DISP_BUF_LEN    ((ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 10)
+#define BYTES_PER_PIXEL    2
+#define MY_DISP_BUF_LEN    ((ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 10 * BYTES_PER_PIXEL)
+// #define MY_DISP_BUF_LEN    ((ST7789_LCD_WIDTH * ST7789_LCD_HEIGHT) / 5)
 /**********************
  *      TYPEDEFS
  **********************/
@@ -46,9 +49,12 @@ void lv_port_disp_init(void)
     disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
 
     /* Create buffer to be used by display */
-    static lv_color_t disp_buf_1[MY_DISP_BUF_LEN];
-    //static lv_color_t disp_buf_2[MY_DISP_BUF_LEN];
+    // static lv_color_t disp_buf_1[MY_DISP_BUF_LEN];
+    static uint8_t disp_buf_1[MY_DISP_BUF_LEN];
     lv_display_set_buffers(disp, disp_buf_1, NULL, sizeof(disp_buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+    //static lv_color_t disp_buf_2[MY_DISP_BUF_LEN];
+    //lv_display_set_buffers(disp, disp_buf_1, disp_buf_2, sizeof(disp_buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     /* Register callbacks. */
     lv_display_set_flush_cb(disp, disp_flush);
