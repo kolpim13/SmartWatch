@@ -2,7 +2,7 @@
 
 void DebugPins_GPIO_Init(void)
 {
-    #if HW_VERSION == HW_V1_0 || HW_VERSION == HW_V1_1
+    #if HW_VERSION == HW_1V0 || HW_VERSION == HW_1V1
 
     /* Configure all pins on port A. */
     GPIO_InitTypeDef  GPIO_InitStructure = {0};

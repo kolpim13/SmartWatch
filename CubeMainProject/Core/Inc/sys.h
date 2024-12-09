@@ -33,11 +33,11 @@
 /*=================================================================*/
 
 /* HW VERSION */
-#define HW_V1_0             100
-#define HW_V1_1             101
-#define HW_V1_2             102
+#define HW_1V0              100
+#define HW_1V1              101
+#define HW_2V0              200
 
-#define HW_VERSION          HW_V1_0
+#define HW_VERSION          HW_1V1
 
 /* DEBUG OR SERIAL SW */
 #define SW_BUILD_DEBUG      0
@@ -49,8 +49,12 @@
 #define MODULE_DISABLE      0
 #define MODULE_ENABLE       1
 
+#if SW_BUILD == SW_BUILD_DEBUG
 #define CLI_MODULE_ENABLE          MODULE_ENABLE
 #define DEBUGPINS_MODULE_ENABLE    MODULE_ENABLE
+
+#include "../modules/DebugPins/debugPins.h"
+#endif
 /*=================================================================*/
 
 /* SHARED RESOURCES AMOUNG PROJECT */
@@ -69,8 +73,7 @@ extern QueueHandle_t EepromQueueHandle;
 /*=================================================================*/
 
 /* DEFINE RESOURCES OF THE MACRO */
-#define TIM_PWR         htim11
-#define TIM_RTC         htim11
+#define TIM_RTC_PWR     htim11
 #define UART_CLI        huart1
 /*=================================================================*/
 

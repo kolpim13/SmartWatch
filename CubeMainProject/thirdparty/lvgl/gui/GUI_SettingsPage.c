@@ -130,19 +130,26 @@ static void event_display_btn_apply_cb(lv_event_t* event)
 {
     lv_obj_t *slider = lv_event_get_user_data(event);
     uint8_t light = lv_bar_get_value(slider);
-    light_prev = light;
 
-    /* Send data to be saved */
-    NvM_Block_t nvm_block = NvM_Block_Display;
-    nvm_ram.data.display.brightness_pc = light;
-    if (xQueueSend(
-            EepromQueueHandle,
-            (void*)&nvm_block,
-            (TickType_t)0) != pdPASS)
+    /* If there were differences --> save them. */
+    if (light_prev != light)
     {
-        /* Add some notification for the user */
-        // ...
-        ;
+
+        /* Send data to be saved */
+        NvM_Block_t nvm_block = NvM_Block_Display;
+        nvm_ram.data.display.brightness_pc = light;
+        if (xQueueSend(
+                EepromQueueHandle,
+                (void*)&nvm_block,
+                (TickType_t)0) != pdPASS)
+        {
+            /* Add some notification for the user */
+            // ...
+            ;
+        }
+
+        /* Write current level of the brightness. */
+        light_prev = light;
     }
 
     lv_menu_set_page(menu, menu_main_page);

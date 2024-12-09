@@ -9,13 +9,11 @@ volatile bool cli_transmition_active = false;
 
 CLI_Status_e CLI_Send_Sync(CLI_INTERFACE_TYPE* data, size_t len)
 {
-    cli_transmition_active = true;
-    HAL_StatusTypeDef ret = HAL_UART_Transmit_DMA(&UART_CLI, (const uint8_t *)data, (uint16_t)len);
+    if (cli_transmition_active == true) {return CLI_Status_BUSY;}
 
-    if (ret != HAL_OK)
-    {
-        cli_transmition_active = false;
-    }
+    cli_transmition_active = true;
+    HAL_StatusTypeDef ret = HAL_UART_Transmit(&UART_CLI, (const uint8_t *)data, (uint16_t)len, 1);
+    cli_transmition_active = false;
 
     if (ret == HAL_ERROR) { return CLI_Status_Error; }
     if (ret == HAL_BUSY) { return CLI_Status_BUSY; }
@@ -27,7 +25,12 @@ CLI_Status_e CLI_Send_Async_Static(CLI_INTERFACE_TYPE* data, size_t len)
     /* If there is no transaction at the moment --> Send right now. */
     if (cli_transmition_active == false)
     {
-        return CLI_Send_Sync(data, len);
+        HAL_StatusTypeDef ret = HAL_UART_Transmit_DMA(&UART_CLI, (const uint8_t *)data, (uint16_t)len);
+
+        if (ret == HAL_ERROR) { return CLI_Status_Error; }
+        if (ret == HAL_BUSY) { return CLI_Status_BUSY; }
+        if (ret == HAL_TIMEOUT) { return CLI_Status_TIMEOUT; }
+        return CLI_Status_OK;
     }
 
     /* Otherwise --> queue message to send. */

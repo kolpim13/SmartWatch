@@ -21,7 +21,7 @@
  * 
  */
 
-#if HW_VERSION == HW_V1_0 || HW_VERSION == HW_V1_1
+#if HW_VERSION == HW_1V0 || HW_VERSION == HW_1V1
 #define DEBUG_PIN_0         GPIO_PIN_12
 #define DEBUG_PIN_0_PORT    GPIOA
 

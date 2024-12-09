@@ -72,8 +72,8 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart1;
-DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart1_tx;
 
 osThreadId EepromTaskHandle;
 uint32_t EepromTaskBuffer[ 128 ];
@@ -88,7 +88,7 @@ osMessageQId EepromQueueHandle;
 uint8_t EepromQueueBuffer[ 16 * sizeof( uint8_t ) ];
 osStaticMessageQDef_t EepromQueueControlBlock;
 osMessageQId CliQueueHandle;
-uint8_t CliQueueBuffer[ 5 * sizeof( CLI_Data_Async_Static_t ) ];
+uint8_t CliQueueBuffer[ 5 * sizeof( uint16_t ) ];
 osStaticMessageQDef_t CliQueueControlBlock;
 /* USER CODE BEGIN PV */
 
@@ -106,8 +106,8 @@ static void MX_TIM3_Init(void);
 static void MX_CRC_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_TIM11_Init(void);
 static void MX_IWDG_Init(void);
+static void MX_TIM11_Init(void);
 void StartEepromTask(void const * argument);
 void StartLvglTask(void const * argument);
 void StartIdleTask(void const * argument);
@@ -158,8 +158,8 @@ int main(void)
   MX_CRC_Init();
   MX_I2C3_Init();
   MX_USART1_UART_Init();
-  MX_TIM11_Init();
   MX_IWDG_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
   PWR_GPIO_Init();
   PWR_ENABLE();
@@ -191,7 +191,7 @@ int main(void)
   EepromQueueHandle = osMessageCreate(osMessageQ(EepromQueue), NULL);
 
   /* definition and creation of CliQueue */
-  osMessageQStaticDef(CliQueue, 5, CLI_Data_Async_Static_t, CliQueueBuffer, &CliQueueControlBlock);
+  osMessageQStaticDef(CliQueue, 5, uint16_t, CliQueueBuffer, &CliQueueControlBlock);
   CliQueueHandle = osMessageCreate(osMessageQ(CliQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -389,7 +389,7 @@ static void MX_I2C3_Init(void)
 
   /* USER CODE END I2C3_Init 1 */
   hi2c3.Instance = I2C3;
-  hi2c3.Init.ClockSpeed = 100000;
+  hi2c3.Init.ClockSpeed = 400000;
   hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c3.Init.OwnAddress1 = 0;
   hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -633,7 +633,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 921600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -727,6 +727,8 @@ void StartEepromTask(void const * argument)
 			  &block_type,
 			  (TickType_t) 100) == pdPASS)
 	  {
+		  CLI_Send_Sync("NvM: 1", sizeof("NvM: 1"));
+
 		  switch (block_type)
 		  {
 		      case NvM_Block_RTC:
@@ -734,15 +736,22 @@ void StartEepromTask(void const * argument)
 		    	  NvM_Save_RTC();
 		    	  break;
 		      }
+          case NvM_Block_Display:
+          {
+          NvM_Save_Display();
+          break;
+          }
 		      default:
 		      {
 		    	  break;
 		      }
-		  }
+      }
 
 		  /* After each block that should be saved --> calculate crc and save it also in NvM. */
 		  nvm_ram.validity.crc = NvM_CalculateCRC();
 		  NvM_Save_Validity();
+
+		  CLI_Send_Sync("NvM: 0", sizeof("NvM: 0"));
 	  }
   }
   /* USER CODE END 5 */
@@ -765,8 +774,13 @@ void StartLvglTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	lv_timer_handler();
-    vTaskDelay(1);
+	  CLI_Send_Sync("LVGL: 1", sizeof("LVGL: 1"));
+
+	  lv_timer_handler();
+
+	  CLI_Send_Sync("LVGL: 0", sizeof("LVGL: 0"));
+
+	  vTaskDelay(1);
   }
   /* USER CODE END StartLvglTask */
 }
@@ -784,11 +798,15 @@ void StartIdleTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+	  CLI_Send_Sync("Idle: 1", sizeof("Idle: 1"));
+
 	  /* Update Current Date and Time. */
 	  RTC_Cyclic_1s();
 
 	  /* Feed the watchdog */
 	  HAL_IWDG_Refresh(&hiwdg);
+
+	  CLI_Send_Sync("Idle: 0", sizeof("Idle: 0"));
 
 	  vTaskDelay(1);
   }
@@ -811,20 +829,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM9) {
     HAL_IncTick();
   }
-
+  /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM11)
-  {
-    /* Notify that this is time to update RTC data. */
-    RTC_DateTimeUpdate_Notify();
-
-    /* Update time for PWR manager. */
-    pwr_counter++;
-    if (pwr_counter == 2)
     {
-      // ...
-      pwr_counter = 0;
+      /* Notify that this is time to update RTC data. */
+      RTC_DateTimeUpdate_Notify();
+
+      /* Update time for PWR manager. */
+      pwr_counter++;
+      if (pwr_counter == 2)
+      {
+        // ...
+        pwr_counter = 0;
+      }
     }
-  }
   /* USER CODE END Callback 1 */
 }
 

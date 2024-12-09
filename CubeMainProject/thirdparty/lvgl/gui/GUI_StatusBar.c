@@ -76,12 +76,15 @@ static void update_status_bar_1s(void)
     static RTC_TimeTypeDef time_prev = {0};
     static bool charge_active_prev = false;
 
+    /* Whole block without entering nested conditions 1.5 - 2 uS. */
+
     /* Get current date and time*/
     const RTC_TimeTypeDef* time = RTC_GetTime();
 
     /* If seconds differ --> Update time label */
     if (time->Minutes != time_prev.Minutes)
     {
+        /* 425 - 430 uS. */
         time_prev = *time;
         lv_label_set_text_fmt(
             time_label, "%02u:%02u",
@@ -98,6 +101,7 @@ static void update_status_bar_1s(void)
     bool charge_active = PWR_IsChargeActive();
     if (charge_active != charge_active_prev)
     {
+        /* 140 - 145 uS. */
         /* If charge connected --> make battery bar green */
         if (charge_active == true)
         {
