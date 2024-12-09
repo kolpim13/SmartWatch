@@ -144,7 +144,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  SYS_Build_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -169,7 +169,6 @@ int main(void)
   lv_port_disp_init();
   lv_port_indev_init();
   GUI_Init();
-  SYS_Build_Init();
   HAL_IWDG_Refresh(&hiwdg);
 
   /* USER CODE END 2 */

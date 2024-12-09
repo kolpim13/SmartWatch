@@ -101,13 +101,14 @@ static void update_status_bar_1s(void)
         /* If charge connected --> make battery bar green */
         if (charge_active == true)
         {
-            lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GREEN_LIGHT(), LV_PART_INDICATOR);
+            lv_obj_set_style_bg_color(battery_bar, MAKE_COLOR_GREEN_LIGHT(), LV_PART_INDICATOR);
         }
         /* If not --> Return light gray color. */
         else
         {
-            lv_obj_set_style_border_color(battery_bar, MAKE_COLOR_GRAY_LIGHT(), LV_PART_INDICATOR);
+            lv_obj_set_style_bg_color(battery_bar, MAKE_COLOR_GRAY_LIGHT(), LV_PART_INDICATOR);
         }
+        charge_active_prev = charge_active;
     }
 }
 /*=================================================================*/
