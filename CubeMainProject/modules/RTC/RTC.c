@@ -3,6 +3,7 @@
 /*=================================================================*/
 
 static volatile bool notify_date_time_update = false;
+static volatile bool notify_time_format_changed = false;
 static volatile RTC_TimeTypeDef sTime = {0};
 static volatile RTC_DateTypeDef sDate = {0};
 /*=================================================================*/
@@ -69,11 +70,35 @@ void RTC_Cyclic_1s(void)
         HAL_RTC_GetTime(&hrtc, &sTime, RTC_TIME_FORMAT);
         HAL_RTC_GetDate(&hrtc, &sDate, RTC_TIME_FORMAT);
     }
+
+    /* Update time format */
+    if (notify_time_format_changed == true)
+    {
+        notify_time_format_changed = false;
+        if (HAL_RTC_Init(&hrtc) != HAL_OK)
+        {
+            Error_Handler();
+        }
+    }
 }
 
 void RTC_DateTimeUpdate_Notify(void)
 {
     notify_date_time_update = true;
+}
+
+void RTC_SetTimeFormat(uint8_t time_format)
+{
+    if (hrtc.Init.HourFormat != time_format)
+    {
+        hrtc.Init.HourFormat = time_format;
+        notify_time_format_changed = true;
+    }
+}
+
+uint32_t RTC_GetTimeFormat(void)
+{
+    return hrtc.Init.HourFormat;
 }
 
 void RTC_SetTime(const RTC_TimeTypeDef* const time)

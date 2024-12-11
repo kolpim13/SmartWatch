@@ -12,6 +12,9 @@
  * @version 0.3 @date 204-11-27
  *  - Conversion BCD <--> Byte added.
  * 
+ * @version 0.4 @date 2024-12-11
+ *  - RTC Interface to change and get Time format added. 
+ * 
  * @copyright Copyright (c) 2024
  * 
  * @todo Perform tests on different data formats to understand wich is better (faster, consumes less resources).
@@ -58,6 +61,20 @@ void RTC_Cyclic_1s(void);
  * 
  */
 void RTC_DateTimeUpdate_Notify(void);
+
+/**
+ * @brief 
+ * 
+ * @param time_format Possible values: [RTC_HOURFORMAT_24, RTC_HOURFORMAT_12]
+ */
+void RTC_SetTimeFormat(uint8_t time_format);
+
+/**
+ * @brief 
+ * 
+ * @return uint8_t [RTC_HOURFORMAT_24, RTC_HOURFORMAT_12]
+ */
+uint32_t RTC_GetTimeFormat(void);
 
 /**
  * @brief 
