@@ -13,7 +13,8 @@
  *  - Interface NvM_GetConfig removed. Global variable is used instead. [Not yet | TBD]
  *  - Now CRC is used as a mechanizm of verification of data validity.
  * 
- * @todo Optimize time and complexity of the operations
+ * @todo Optimize time and complexity of the operations. {Create new module architecture} [HARD]
+ * @todo Add function to save data to write to queue. (Read from the queue not needed now) [EASY]
  */
 
 #ifndef NvM_NvM_H_
@@ -21,6 +22,7 @@
 
 #include "sys.h"
 #include "BL24C02F.h"
+#include "../RTC/RTC.h"
 /*=================================================================*/
 
 #define NvM_LEN         BL24C02F_MAX_LEN
@@ -60,6 +62,7 @@ typedef struct NvM_Block_RTC_t
 {
     RTC_DateTypeDef Date;
     RTC_TimeTypeDef Time;
+    RTC_TimeFormat_t time_format;
 } NvM_Block_RTC_t;
 
 typedef struct NvM_Block_Display_t

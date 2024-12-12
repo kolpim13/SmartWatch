@@ -12,6 +12,8 @@ static lv_obj_t* time_label;
 static lv_obj_t* battery_bar;
 static lv_obj_t* battery_label;
 static lv_obj_t* update_timer = NULL;
+
+static volatile bool notify_time_upd = false;
 /*=================================================================*/
 
 /* INIT */
@@ -28,7 +30,14 @@ static lv_obj_t* battery_bar_create(void);
  * Non-reentrant
  * Should be called periodically.
  */
-static void update_status_bar_1s(void);
+static void update_status_bar(void);
+
+/**
+ * @brief Generic callback for status bar widget.
+ * 
+ * @param event 
+ */
+static void event_generic_status_bar_cb(lv_event_t* event);
 /*=================================================================*/
 
 static lv_obj_t* battery_bar_create()
@@ -71,7 +80,7 @@ static lv_obj_t* battery_bar_create()
     return battery_bar;
 }
 
-static void update_status_bar_1s(void)
+static void update_status_bar(void)
 {
     static RTC_TimeTypeDef time_prev = {0};
     static bool charge_active_prev = false;
@@ -82,14 +91,17 @@ static void update_status_bar_1s(void)
     const RTC_TimeTypeDef* time = RTC_GetTime();
 
     /* If seconds differ --> Update time label */
-    if (time->Minutes != time_prev.Minutes)
+    notify_time_upd = time->Minutes != time_prev.Minutes ? true : notify_time_upd;
+    if (notify_time_upd == true)
     {
-        /* 425 - 430 uS. */
+        /* 425 - 430 uS.
+        Remeasure it after time formatting was added. */
         time_prev = *time;
         lv_label_set_text_fmt(
-            time_label, "%02u:%02u",
+            time_label, "%02u:%02u %s",
             RTC_BCDtoByte(time->Hours), 
-            RTC_BCDtoByte(time->Minutes)
+            RTC_BCDtoByte(time->Minutes),
+            RTC_GetTimeFormat() == RTC_TimeFormat_24H ? "" : time->TimeFormat == RTC_HOURFORMAT12_AM ? "am" : "pm"
         );
     }
 
@@ -113,6 +125,16 @@ static void update_status_bar_1s(void)
             lv_obj_set_style_bg_color(battery_bar, MAKE_COLOR_GRAY_LIGHT(), LV_PART_INDICATOR);
         }
         charge_active_prev = charge_active;
+    }
+}
+
+static void event_generic_status_bar_cb(lv_event_t* event)
+{
+    lv_event_code_t code = lv_event_get_code(event);
+
+    if (code == LV_EVENT_REFRESH)
+    {
+        update_status_bar();
     }
 }
 /*=================================================================*/
@@ -144,8 +166,17 @@ void GUI_StatusBar_Create(void)
 
     /* Update timer */
     update_timer = lv_timer_create_basic();
-    lv_timer_set_cb(update_timer, update_status_bar_1s);
-    lv_timer_set_period(update_timer, 500);
+    lv_timer_set_cb(update_timer, update_status_bar);
+    lv_timer_set_period(update_timer, 1000);
     lv_timer_ready(update_timer);
+
+    /* Add events for status bar */
+    lv_obj_add_event_cb(status_bar, event_generic_status_bar_cb, LV_EVENT_REFRESH, NULL);
+}
+
+void GUI_StatusBar_Update(void)
+{
+	notify_time_upd = true;
+    lv_obj_send_event(status_bar, LV_EVENT_REFRESH, NULL);
 }
 /*=================================================================*/

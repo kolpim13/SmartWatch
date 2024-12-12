@@ -161,7 +161,6 @@ int main(void)
   MX_IWDG_Init();
   MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
-  PWR_GPIO_Init();
   PWR_ENABLE();
   NvM_StartUp();
   RTC_Init();
@@ -699,6 +698,7 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
+  PWR_GPIO_Init();
   DebugPins_GPIO_Init();
 
 /* USER CODE END MX_GPIO_Init_2 */

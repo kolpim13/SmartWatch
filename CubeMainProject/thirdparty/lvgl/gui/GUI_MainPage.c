@@ -1,7 +1,7 @@
 #include "GUI_MainPage.h"
 #include "../modules/RTC/RTC.h"
 
-extern const lv_font_t lv_font_debrosee_digitsonly_40;
+extern const lv_font_t font_digital_40_time_only;
 
 static lv_obj_t* main_page = NULL;
 static lv_obj_t* time_label = NULL;
@@ -43,12 +43,15 @@ static bool update_time_label(void)
     /* If seconds differ --> Update time label */
     if (time->Seconds != time_prev.Seconds)
     {
+        /* 425 - 430 uS.
+        Remeasure it after time formatting was added. */
         time_prev = *time;
         lv_label_set_text_fmt(
-            time_label, "%02u:%02u:%02u",
+            time_label, "%02u:%02u:%02u %s",
             RTC_BCDtoByte(time->Hours), 
             RTC_BCDtoByte(time->Minutes),
-            RTC_BCDtoByte(time->Seconds)
+            RTC_BCDtoByte(time->Seconds),
+            RTC_GetTimeFormat() == RTC_TimeFormat_24H ? "" : time->TimeFormat == RTC_HOURFORMAT12_AM ? "a.m." : "p.m."
         );
         return true;
     }
@@ -102,7 +105,7 @@ void GUI_MainPage_Create(lv_obj_t* parent)
     time_label = lv_label_create(main_page);
     lv_obj_set_width(time_label, lv_display_get_horizontal_resolution(NULL) - 10);
     lv_obj_set_style_text_align(time_label, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_font(time_label, &lv_font_debrosee_digitsonly_40, 0);
+    lv_obj_set_style_text_font(time_label, &font_digital_40_time_only, 0);
     lv_obj_align(time_label, LV_ALIGN_TOP_MID, 0, 40);
     lv_label_set_text(time_label, "");
 

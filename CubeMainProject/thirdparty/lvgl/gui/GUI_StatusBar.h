@@ -10,6 +10,10 @@
  * @version 0.2 @date 2024-11-30
  *  - Logic of timer to update status bar was moved inside this file. 
  * 
+ * @version 0.3 @date 2024-12-12
+ *  - Interface "GUI_StatusBar_Update". It will update status bar 
+ * on the next cycle of lvgl main handler.
+ * 
  * 
  * @todo Change text color [black <--> white] based on the background color
  * @todo 
@@ -31,7 +35,13 @@
  * Can create only one object at a time
  * 
  */
-void GUI_StatusBar_Create();
+void GUI_StatusBar_Create(void);
+
+/**
+ * @brief Function is called to update status bar immediately
+ * 
+ */
+void GUI_StatusBar_Update(void);
 /*=================================================================*/
 
 #endif //_GUI_STATUSBAR_H_

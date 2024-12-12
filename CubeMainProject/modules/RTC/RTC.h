@@ -1,7 +1,11 @@
 /**
  * @file RTC.h
  * @author Maksym T. (torgunakovmaks2@gmail.com)
- * @brief 
+ * @brief Module responsible for RTC interaction.
+ * Based on the HAL_RTC module.
+ * Internally (On register level) time format as always 24H. 
+ * When it is switched --> only representation of the output values changes. 
+ * 
  * @version 0.1 @date 2024-07-09
  *  - Module created
  * 
@@ -12,10 +16,13 @@
  * @version 0.3 @date 204-11-27
  *  - Conversion BCD <--> Byte added.
  * 
- * @copyright Copyright (c) 2024
+ * @version 0.4 @date 2024-12-11
+ *  - RTC Interface to change and get Time format added. 
  * 
  * @todo Perform tests on different data formats to understand wich is better (faster, consumes less resources).
  * @todo Add some syncronization mechanizm to the module, so wont be any rase conditions.
+ * 
+ * @copyright Copyright (c) 2024
  */
 
 #ifndef RTC_RTC_H_
@@ -34,6 +41,13 @@
 
 #define RTC_BCDtoByte(bcd)          RTC_Bcd2ToByte(bcd)
 #define RTC_ByteToBCD(byte)         RTC_ByteToBcd2(byte)
+/*=================================================================*/
+
+typedef enum
+{
+    RTC_TimeFormat_24H = RTC_HOURFORMAT_24,
+    RTC_TimeFormat_12H = RTC_HOURFORMAT_12,
+}RTC_TimeFormat_t;
 /*=================================================================*/
 
 /**
@@ -58,6 +72,23 @@ void RTC_Cyclic_1s(void);
  * 
  */
 void RTC_DateTimeUpdate_Notify(void);
+
+/**
+ * @brief 
+ * 
+ * 
+ * @param format --> RTC_TimeFormat_t: 
+ * [RTC_TimeFormat_24H == RTC_HOURFORMAT_24, 
+ * RTC_TimeFormat_12H == RTC_HOURFORMAT_12]
+ */
+void RTC_SetTimeFormat(RTC_TimeFormat_t format);
+
+/**
+ * @brief 
+ * 
+ * @return RTC_TimeFormat_t
+ */
+RTC_TimeFormat_t RTC_GetTimeFormat(void);
 
 /**
  * @brief 
