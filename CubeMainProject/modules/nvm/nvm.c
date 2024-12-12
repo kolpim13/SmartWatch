@@ -97,11 +97,12 @@ NvM_Status_e NvM_StartUp(void)
 
 void NvM_FillWithDefaultData(void)
 {
-    /* Set date and time to "0" */
+    /* Set date and time to "0"; timeformat to 24H. */
     memset((void *)&nvm_ram.data.rtc, 0, sizeof(NvM_Block_RTC_t));
 
+    /* Brightness to 100%. */
     nvm_ram.data.display.brightness_pc = 100;
-    memset((void *)nvm_ram.data.display.reserved, 0, sizeof(nvm_ram.data.display.reserved));
+    memset((void *)&nvm_ram.data.display.reserved, 0, sizeof(nvm_ram.data.display.reserved));
 }
 
 NvM_Status_e NvM_Read_All(void)
