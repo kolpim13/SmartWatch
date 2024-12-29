@@ -14,7 +14,7 @@
  * @version 0.4:
  *  - Interface for reading current blacklight state added. 
  * 
- * @version 0.5:
+ * @version 0.5 @date 2023-12-28:
  *  - Naming for static functions and defines changed - No module name present.
  *  - Implementation for several commands added:
  *      * Sleep In

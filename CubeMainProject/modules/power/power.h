@@ -53,6 +53,12 @@ void PWR_GPIO_Init(void);
  */
 bool PWR_IsChargeActive(void);
 
+void PWR_PowerMode_IncreaseCounter(uint32_t ms);
+void PWR_PowerMode_ResetCounter(void);
+void PWR_PowerMode_SetCounterLimit(uint32_t ms);
+void PWR_PowerMode_EnterLowPowerMode_Notify(void);
+void PWR_PowerMode_EnterNormalMode_Notify(void);
+
 void PWR_Cyclic(void);
 /*=================================================================*/
 
