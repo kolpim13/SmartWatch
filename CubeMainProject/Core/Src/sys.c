@@ -1,5 +1,6 @@
 #include "sys.h"
 
+#include "power.h"
 #include "ST7789.h"
 
 #include "cli.h"
@@ -52,6 +53,20 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         {
             cli_transmition_active = false;
         }
+    }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t pin)
+{
+    /* PWR.
+    Touch controller INT. */
+    if (pin == GPIO_PIN_15)
+    {
+        DEBUG_PIN_4_SET();
+        PWR_PowerMode_ResetCounter();
+        PWR_PowerMode_EnterNormalMode_Notify();
+        EXTI->PR |= EXTI_PR_PR15;
+        DEBUG_PIN_4_RESET();
     }
 }
 /*=================================================================*/

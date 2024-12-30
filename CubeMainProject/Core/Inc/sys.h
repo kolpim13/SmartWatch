@@ -25,11 +25,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
+#include <stm32f4xx.h>
+#include <stm32f4xx_hal.h>
 
 #include <FreeRTOS.h>
 #include <queue.h>
+#include <task.h>
 /*=================================================================*/
 
 /* HW VERSION */
@@ -68,11 +69,18 @@ extern UART_HandleTypeDef huart1;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 
+/* FREE RTOS */
+
+extern TaskHandle_t EepromTaskHandle;
+extern TaskHandle_t IdleTaskHandle;
+extern TaskHandle_t LvglTaskHandle;
+
 extern QueueHandle_t CliQueueHandle;
 extern QueueHandle_t EepromQueueHandle;
 /*=================================================================*/
 
-/* DEFINE RESOURCES OF THE MACRO */
+/* DEFINE HW RESOURCES OF THE MCU */
+
 #define TIM_RTC_PWR     htim11
 #define UART_CLI        huart1
 /*=================================================================*/

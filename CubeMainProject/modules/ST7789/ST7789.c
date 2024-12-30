@@ -193,12 +193,18 @@ void ST7789_SleepIn(void)
 {
 	WriteCommand(SLPIN);
 	HAL_Delay(5);
+
+    /* Disable blacklight */
+    HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
 
 void ST7789_SleepOut(void)
 {
 	WriteCommand(SLPOUT);
 	HAL_Delay(5);
+
+    /* Enable blacklight */
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 
 void ST7789_FillArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t* color)
