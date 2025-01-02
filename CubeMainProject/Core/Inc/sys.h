@@ -53,17 +53,31 @@
 #if SW_BUILD == SW_BUILD_DEBUG
 #define CLI_MODULE_ENABLE          MODULE_ENABLE
 #define DEBUGPINS_MODULE_ENABLE    MODULE_ENABLE
+#endif
 
+#if CLI_MODULE_ENABLE == MODULE_ENABLE
+#include "../modules/CLI/cli.h"
+
+/* Mocro to show when task starts and finish. */
+#define CLI_SEND_STR_SYNC(STR)          CLI_Send_Sync(#STR, sizeof(#STR)-1)
+#define CLI_SYNC_TASK_START(TASK)       CLI_Send_Sync(#TASK"-1", sizeof(#TASK"-1") - 1)
+#define CLI_SYNC_TASK_FINISH(TASK)      CLI_Send_Sync(#TASK"-0", sizeof(#TASK"-0") - 1)
+#endif
+
+#if DEBUGPINS_MODULE_ENABLE == MODULE_ENABLE
 #include "../modules/DebugPins/debugPins.h"
 #endif
 /*=================================================================*/
+/* SHARED HW RESOURCES */
 
-/* SHARED RESOURCES AMOUNG PROJECT */
 extern RTC_HandleTypeDef hrtc;
 extern CRC_HandleTypeDef hcrc;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi1;
+extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c2;
+extern I2C_HandleTypeDef hi2c3;
 extern DMA_HandleTypeDef hdma_spi1_tx;
 extern UART_HandleTypeDef huart1;
 extern DMA_HandleTypeDef hdma_usart1_tx;
@@ -81,6 +95,7 @@ extern QueueHandle_t EepromQueueHandle;
 
 /* DEFINE HW RESOURCES OF THE MCU */
 
+#define SPI_DISP        hspi1
 #define TIM_RTC_PWR     htim11
 #define UART_CLI        huart1
 /*=================================================================*/

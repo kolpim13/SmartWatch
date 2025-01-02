@@ -56,6 +56,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (&UART_CLI == huart)
+    {
+
+    }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t pin)
 {
     /* PWR.
@@ -65,7 +73,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t pin)
         DEBUG_PIN_4_SET();
         PWR_PowerMode_ResetCounter();
         PWR_PowerMode_EnterNormalMode_Notify();
-        EXTI->PR |= EXTI_PR_PR15;
         DEBUG_PIN_4_RESET();
     }
 }

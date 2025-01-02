@@ -730,7 +730,7 @@ void StartEepromTask(void const * argument)
 			  &block_type,
 			  (TickType_t) 100) == pdPASS)
 	  {
-		  CLI_Send_Sync("NvM: 1", sizeof("NvM: 1"));
+      CLI_SYNC_TASK_START(NvM);
 
 		  switch (block_type)
 		  {
@@ -741,8 +741,8 @@ void StartEepromTask(void const * argument)
 		      }
           case NvM_Block_Display:
           {
-          NvM_Save_Display();
-          break;
+            NvM_Save_Display();
+            break;
           }
           case NvM_Block_System:
           {
@@ -759,7 +759,7 @@ void StartEepromTask(void const * argument)
 		  nvm_ram.validity.crc = NvM_CalculateCRC();
 		  NvM_Save_Validity();
 
-		  CLI_Send_Sync("NvM: 0", sizeof("NvM: 0"));
+      CLI_SYNC_TASK_FINISH(NvM);
 	  }
   }
   /* USER CODE END 5 */
@@ -782,11 +782,11 @@ void StartLvglTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  CLI_Send_Sync("LVGL: 1", sizeof("LVGL: 1"));
+    CLI_SYNC_TASK_START(LV);
 
 	  lv_timer_handler();
 
-	  CLI_Send_Sync("LVGL: 0", sizeof("LVGL: 0"));
+    CLI_SYNC_TASK_FINISH(LV);
 
 	  vTaskDelay(1);
   }
@@ -806,7 +806,7 @@ void StartIdleTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  CLI_Send_Sync("Idle: 1", sizeof("Idle: 1"));
+    CLI_SYNC_TASK_START(Idle);
 
 	  /* Update Current Date and Time. */
 	  RTC_Cyclic_1s();
@@ -817,7 +817,7 @@ void StartIdleTask(void const * argument)
 	  /* Feed the watchdog */
 	  HAL_IWDG_Refresh(&hiwdg);
 
-	  CLI_Send_Sync("Idle: 0", sizeof("Idle: 0"));
+    CLI_SYNC_TASK_FINISH(Idle);
 
 	  vTaskDelay(1);
   }
