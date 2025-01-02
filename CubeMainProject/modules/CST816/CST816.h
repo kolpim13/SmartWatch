@@ -41,10 +41,11 @@
 #define CST816_SLEEP_MODE       0xE5
 #define CST816_NOR_SCAN_PERIOD  0xEE    /* [1 - 30] unit: 10 ms.*/
 #define CST816_AUTO_SLEEP_TIME  0xF9
-#define CST816_IRQ_CTL          0xFA
 #define CST816_LONG_PRESS_TICK  0xEB
 #define CST816_MOTION_MASK      0xEC
 #define CST816_DIS_AUTOSLEEP    0xFE
+
+#define CST816_IRQ_CTL          0xFA
 /*=================================================================*/
 
 #define CST816_RST_PORT         GPIOB
@@ -59,8 +60,18 @@
 /*=================================================================*/
 
 void CST816_GPIO_Init(void);
-void CST816_Reset(void);
+
+/**
+ * @brief Chip startup sequence
+ * 
+ */
 void CST816_Init(void);
+
+/**
+ * @brief Perform hardware reset
+ * 
+ */
+void CST816_Reset_HW(void);
 
 /**
  * @brief Reads number of fingers present on the screen.

@@ -163,6 +163,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   PWR_ENABLE();
   NvM_StartUp();
+  PWR_Startup();
   RTC_Init();
   lv_init();
   lv_port_disp_init();
@@ -701,6 +702,8 @@ static void MX_GPIO_Init(void)
   PWR_GPIO_Init();
   DebugPins_GPIO_Init();
 
+  CST816_GPIO_Init();
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -740,6 +743,11 @@ void StartEepromTask(void const * argument)
           {
           NvM_Save_Display();
           break;
+          }
+          case NvM_Block_System:
+          {
+            NvM_Save_System();
+            break;
           }
 		      default:
 		      {
@@ -803,6 +811,9 @@ void StartIdleTask(void const * argument)
 	  /* Update Current Date and Time. */
 	  RTC_Cyclic_1s();
 
+    /* Power Manager. */
+    PWR_Cyclic();
+
 	  /* Feed the watchdog */
 	  HAL_IWDG_Refresh(&hiwdg);
 
@@ -824,24 +835,20 @@ void StartIdleTask(void const * argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-  static size_t pwr_counter = 0;
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM9) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+
+  /* Timer riches this interrupt once in 500 mS. */
   if (htim->Instance == TIM11)
     {
       /* Notify that this is time to update RTC data. */
       RTC_DateTimeUpdate_Notify();
 
-      /* Update time for PWR manager. */
-      pwr_counter++;
-      if (pwr_counter == 2)
-      {
-        // ...
-        pwr_counter = 0;
-      }
+      /* Update */
+      PWR_PowerMode_IncreaseCounter(500);
     }
   /* USER CODE END Callback 1 */
 }

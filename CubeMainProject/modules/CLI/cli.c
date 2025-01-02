@@ -56,7 +56,8 @@ CLI_Status_e CLI_Send_Async_Dynamic(CLI_INTERFACE_TYPE* data, size_t len)
 
 void CLI_Main_Cyclic(void)
 {
-    // Process reception 
+    /* Get all input messages. */
+
 
     /* Read and process all Static messages to be sent */
     CLI_Data_Async_Static_t send_data_async_static;
@@ -72,5 +73,10 @@ void CLI_Main_Cyclic(void)
     }
 
     /* Read and process all Dynamic data to be sent */
+}
+
+void CLI_Async_RxFinished_cb(void)
+{
+
 }
 /*=================================================================*/

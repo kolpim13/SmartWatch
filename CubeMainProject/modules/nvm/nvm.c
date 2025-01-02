@@ -48,6 +48,11 @@ NvM_Status_e NvM_Save_Display(void)
     return NvM_Save(NvM_BLOCK_DISPLAY_ADR, (uint8_t *)&(nvm_ram.data.display), sizeof(NvM_Block_Display_t));
 }
 
+NvM_Status_e NvM_Save_System(void)
+{
+    return NvM_Save(NvM_BLOCK_SYSTEM_ADR, (uint8_t *)&(nvm_ram.data.system), sizeof(NvM_Block_System_t));
+}
+
 NvM_Status_e NvM_Save_Validity(void)
 {
     return NvM_Save(NvM_BLOCK_VALIDITY_ADR, (uint8_t *)&(nvm_ram.validity), sizeof(NvM_Validity_t));
@@ -103,6 +108,9 @@ void NvM_FillWithDefaultData(void)
     /* Brightness to 100%. */
     nvm_ram.data.display.brightness_pc = 100;
     memset((void *)&nvm_ram.data.display.reserved, 0, sizeof(nvm_ram.data.display.reserved));
+
+    /* time to low power - 10 seconds. */
+    nvm_ram.data.system.time_to_low_power_ms = 10000;
 }
 
 NvM_Status_e NvM_Read_All(void)

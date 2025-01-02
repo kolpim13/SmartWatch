@@ -1,5 +1,6 @@
 #include "GUI_SettingsPage.h"
 
+#include "../modules/power/power.h"
 #include "../modules/nvm/nvm.h"
 #include "../modules/RTC/RTC.h"
 #include "../modules/ST7789/ST7789.h"
@@ -9,14 +10,28 @@ typedef enum{
 } User_Data_t;
 /*=================================================================*/
 
+/* */
+static const uint32_t time_to_low_power_ms[] = {
+    SECONDS_TO_MILISECONDS(5),
+    SECONDS_TO_MILISECONDS(10),
+    SECONDS_TO_MILISECONDS(30),
+    MINUTES_TO_MILISECONDS(1),
+    MINUTES_TO_MILISECONDS(2),
+    MINUTES_TO_MILISECONDS(5),
+};
+/*=================================================================*/
+
 static lv_obj_t* settings_page = NULL;
 static lv_obj_t* menu;
 static lv_obj_t* menu_main_page;
 static lv_obj_t* menu_display_page;
 static lv_obj_t* menu_datetime_page;
+static lv_obj_t* menu_system_page;
 
 static uint8_t light_prev;
 static RTC_TimeFormat_t time_format;
+
+static lv_obj_t* dd_timeToLowPower;
 /*=================================================================*/
 
 /* MAIN */
@@ -34,6 +49,10 @@ static void event_datetime_switch_timeformat_cb(lv_event_t* event);
 static void event_datetime_btn_apply_cb(lv_event_t* event);
 static void event_datetime_btn_cancel_cb(lv_event_t* event);
 
+/* SYSTEM */
+static void menu_page_system_create(void);
+static void event_system_btn_apply_cb(void);
+static void event_system_btn_cancel_cb(void);
 /* AUXILIARY FUNCTIONS */
 // ...
 
@@ -54,12 +73,13 @@ static void menu_page_main_create()
 
     content = lv_menu_cont_create(menu_main_page);
     label = lv_label_create(content);
-    lv_label_set_text(label, "Time & Date");
+    lv_label_set_text(label, "Date & Time");
     lv_menu_set_load_page_event(menu, content, menu_datetime_page);
 
     content = lv_menu_cont_create(menu_main_page);
     label = lv_label_create(content);
-    lv_label_set_text(label, "System [TBD]");   /* Energy saving settings. */
+    lv_label_set_text(label, "System");
+    lv_menu_set_load_page_event(menu, content, menu_system_page);
 
     content = lv_menu_cont_create(menu_main_page);
     label = lv_label_create(content);
@@ -161,7 +181,7 @@ static void menu_page_datetime_create(void)
     lv_obj_t* label;
     lv_obj_t* btn;
 
-    /* Menu page */
+    /* Date & time page */
     menu_datetime_page = lv_menu_page_create(menu, NULL);
     content = lv_menu_cont_create(menu_datetime_page);
     lv_obj_set_flex_flow(content, LV_FLEX_FLOW_COLUMN);
@@ -249,6 +269,76 @@ static void event_datetime_btn_cancel_cb(lv_event_t* event)
     lv_menu_set_page(menu, menu_main_page);
 }
 
+/* SYSTEM */
+static void menu_page_system_create(void)
+{
+    lv_obj_t* content;
+    lv_obj_t* label;
+    lv_obj_t* btn;
+
+    /* System page */
+    menu_system_page = lv_menu_page_create(menu, NULL);
+    content = lv_menu_cont_create(menu_system_page);
+    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(content, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+    /* Time to go to low power mode */
+    lv_obj_t *cont_timeToLowPower = lv_obj_create(content);
+    lv_obj_set_size(cont_timeToLowPower, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(cont_timeToLowPower, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(cont_timeToLowPower, LV_FLEX_ALIGN_START,  LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_remove_flag(cont_timeToLowPower, LV_OBJ_FLAG_SCROLLABLE);
+
+    label = lv_label_create(cont_timeToLowPower);
+    lv_label_set_text(label, "Time to low power : ");
+
+    dd_timeToLowPower = lv_dropdown_create(cont_timeToLowPower);
+    lv_dropdown_set_options(
+        dd_timeToLowPower,
+        "5 seconds\n"
+        "10 seconds\n"
+        "30 seconds\n"
+        "1 minute\n"
+        "2 minute\n"
+        "5 minute\n");
+
+    /* Footer */
+    btn = lv_msgbox_add_footer_button(content, "Apply");
+    lv_obj_set_flex_grow(btn, 1);
+    lv_obj_add_event_cb(btn, event_system_btn_apply_cb, LV_EVENT_CLICKED, NULL);
+
+    btn = lv_msgbox_add_footer_button(content, "Cancel");
+    lv_obj_set_flex_grow(btn, 1);
+    lv_obj_add_event_cb(btn, event_system_btn_cancel_cb, LV_EVENT_CLICKED, NULL);
+}
+
+static void event_system_btn_apply_cb(void)
+{
+    /* Set low power mode limit*/
+    uint32_t index = lv_dropdown_get_selected(dd_timeToLowPower);
+    PWR_PowerMode_SetCounterLimit(time_to_low_power_ms[index]);
+
+    /* Write to the NvM. */
+    NvM_Block_t nvm_block = NvM_Block_System;
+    nvm_ram.data.system.time_to_low_power_ms = time_to_low_power_ms[index];
+    if (xQueueSend(
+            EepromQueueHandle,
+            (void*)&nvm_block,
+            (TickType_t)0) != pdPASS)
+    {
+        /* Add some notification for the user */
+        // ...
+        ;
+    }
+
+    lv_menu_set_page(menu, menu_main_page);
+}
+
+static void event_system_btn_cancel_cb(void)
+{
+    lv_menu_set_page(menu, menu_main_page);
+}
+
 /* AUXILIARY FUNCTIONS */
 // ...
 
@@ -281,6 +371,7 @@ void GUI_SettingsPage_Create(lv_obj_t* parent)
     /* Menu pages */
     menu_page_display_create();
     menu_page_datetime_create();
+    menu_page_system_create();
     menu_page_main_create();
 
     /* Set main page as default */
