@@ -29,6 +29,9 @@
 #define PWR_DISABLE()       HAL_GPIO_WritePin(PWR_EN_PORT, PWR_EN_PIN, GPIO_PIN_RESET)       
 /*=================================================================*/
 
+#define PWR_TIME_TO_LOW_POWER_DIS       UINT32_MAX
+/*=================================================================*/
+
 typedef enum {
     PWR_State_OK,
     PWR_State_NOK,
@@ -45,6 +48,8 @@ typedef enum {
 
 void PWR_GPIO_Init(void);
 
+void PWR_Startup(void);
+
 /**
  * @brief 
  * 
@@ -56,6 +61,7 @@ bool PWR_IsChargeActive(void);
 void PWR_PowerMode_IncreaseCounter(uint32_t ms);
 void PWR_PowerMode_ResetCounter(void);
 void PWR_PowerMode_SetCounterLimit(uint32_t ms);
+uint32_t PWR_PowerMode_GetCounterLimit(void);
 void PWR_PowerMode_EnterLowPowerMode_Notify(void);
 void PWR_PowerMode_EnterNormalMode_Notify(void);
 

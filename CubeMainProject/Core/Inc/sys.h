@@ -85,6 +85,14 @@ extern QueueHandle_t EepromQueueHandle;
 #define UART_CLI        huart1
 /*=================================================================*/
 
+/* UTILS. */
+// To be put in the utils in the future.
+
+#define SECONDS_TO_MILISECONDS(ms)          (1000 * ms)
+#define MNIUTES_TO_SECONDS(minuts)          (60 * minutes)
+#define MINUTES_TO_MILISECONDS(minutes)     (60000 * minutes)
+/*=================================================================*/
+
 /* INTERRUPT CALLBACKS */
 // ...
 /*=================================================================*/

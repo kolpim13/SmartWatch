@@ -1,5 +1,6 @@
 #include "power.h"
 
+#include "nvm.h"
 #include "ST7789.h"
 #include "../../thirdparty/lvgl/lv_port_disp.h"
 #include "../../thirdparty/lvgl/lv_port_indev.h"
@@ -36,8 +37,6 @@ static PWR_State_t enter_low_power_mode(void)
 {
     static Stage_LowPower_t state = Stage_LowPower_DisableUpdateLVGL;
 
-    DEBUG_PIN_0_SET();
-
     switch (state)
     {
         case Stage_LowPower_DisableUpdateLVGL:
@@ -67,8 +66,6 @@ static PWR_State_t enter_low_power_mode(void)
             break;
         }
     }
-
-    DEBUG_PIN_0_RESET();
     
     return PWR_State_OK;
 }
@@ -76,8 +73,6 @@ static PWR_State_t enter_low_power_mode(void)
 static PWR_State_t enter_normal_mode(void)
 {
     static Stage_NormalMode_t state = Stage_NormalMode_WakeUpLcd;
-
-    DEBUG_PIN_1_SET();
 
     switch(state)
     {
@@ -104,8 +99,6 @@ static PWR_State_t enter_normal_mode(void)
         }
     }
 
-    DEBUG_PIN_1_RESET();
-
     return PWR_State_OK;
 }
 /*=================================================================*/
@@ -125,6 +118,11 @@ void PWR_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(PWR_CHARGE_PORT, &GPIO_InitStruct);
+}
+
+void PWR_Startup(void)
+{
+    PWR_PowerMode_SetCounterLimit(nvm_ram.data.system.time_to_low_power_ms);
 }
 
 bool PWR_IsChargeActive(void)
@@ -148,7 +146,16 @@ void PWR_PowerMode_ResetCounter(void)
 
 void PWR_PowerMode_SetCounterLimit(uint32_t ms)
 {
+    if (ms < 5000u) { ms = 5000; }
+    if (ms > MINUTES_TO_MILISECONDS(30u)) { ms = PWR_TIME_TO_LOW_POWER_DIS; }
 
+    low_power_limit_ms = ms;
+    low_power_counter_ms = 0;
+}
+
+uint32_t PWR_PowerMode_GetCounterLimit(void)
+{
+    return low_power_limit_ms;
 }
 
 void PWR_PowerMode_EnterLowPowerMode_Notify(void)
@@ -172,43 +179,42 @@ void PWR_Cyclic(void)
     {
         case PWR_PowerMode_Normal:
         {
-            DEBUG_PIN_0_SET();
+            /* If counter is set to infinite --> does nothing. */
+            if (PWR_TIME_TO_LOW_POWER_DIS == low_power_limit_ms)
+            {
+                break;
+            }
+
+            /* If counter excided its limit --> enter low power mode. */
             if (low_power_counter_ms >= low_power_limit_ms)
             {
                 power_mode = PWR_PowerMode_ToLowPower;
             }
-            DEBUG_PIN_0_RESET();
             break;
         }
         case PWR_PowerMode_LowPower:
         {
-            DEBUG_PIN_1_SET();
             if (enter_normal_mode_notify == true)
             {
                 power_mode = PWR_PowerMode_ToNormal;
                 enter_normal_mode_notify = false;
             }
-            DEBUG_PIN_1_RESET();
             break;
         }
         case PWR_PowerMode_ToLowPower:
         {
-            DEBUG_PIN_2_SET();
             if (enter_low_power_mode() == PWR_State_OK)
             {
                 power_mode = PWR_PowerMode_LowPower;
             }
-            DEBUG_PIN_2_RESET();
             break;
         }
         case PWR_PowerMode_ToNormal:
         {
-            DEBUG_PIN_3_SET();
             if (enter_normal_mode() == PWR_State_OK)
             {
                 power_mode = PWR_PowerMode_Normal;
             }
-            DEBUG_PIN_3_RESET();
             break;
         }
     }
