@@ -163,6 +163,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   PWR_ENABLE();
   NvM_StartUp();
+  PWR_Startup();
   RTC_Init();
   lv_init();
   lv_port_disp_init();
@@ -742,6 +743,11 @@ void StartEepromTask(void const * argument)
           {
           NvM_Save_Display();
           break;
+          }
+          case NvM_Block_System:
+          {
+            NvM_Save_System();
+            break;
           }
 		      default:
 		      {

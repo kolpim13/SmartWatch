@@ -20,7 +20,7 @@
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
     /* LCD DMA Callback */
-    if (hspi == &hspi1)
+    if (&SPI_DISP == hspi)
     {
         disp_flush_ready_cb();
     }

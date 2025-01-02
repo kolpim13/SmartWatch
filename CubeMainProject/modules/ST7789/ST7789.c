@@ -59,6 +59,10 @@ static void PrepaerSendLargeData(void);
 /*=================================================================*/
 
 static volatile bool data_transfer_finished = true;
+
+/* To be used in the future */
+static uint16_t blacklight_raw = 0;     /* [0 - 300] */
+static uint16_t blacklight_pc = 0;      /* [0 - 100] */
 /*=================================================================*/
 
 static inline void WriteCommand(uint8_t command)
@@ -249,13 +253,15 @@ void ST7789_SetLight(uint8_t light)
     if (light < 5) { light = 5; } 
     if (light > 100) { light = 100; }
 
-    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, (uint16_t)(light * (ST7789_BLK_PWM_PERIOD / 100)));
+    blacklight_pc = light;
+    blacklight_raw = blacklight_pc * (ST7789_BLK_PWM_PERIOD / 100);
+
+    __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, blacklight_raw);
 }
 
 uint8_t ST7789_GetLight(void)
 {
-	uint16_t raw_value = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
-	return (uint8_t)(raw_value / (ST7789_BLK_PWM_PERIOD / 100));
+	return blacklight_pc;
 }
 
 bool ST7789_CheckTrasferFinished(void)
