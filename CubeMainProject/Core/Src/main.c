@@ -701,6 +701,8 @@ static void MX_GPIO_Init(void)
   PWR_GPIO_Init();
   DebugPins_GPIO_Init();
 
+  CST816_GPIO_Init();
+
 /* USER CODE END MX_GPIO_Init_2 */
 }
 

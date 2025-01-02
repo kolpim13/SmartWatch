@@ -34,6 +34,7 @@
 /* ADDRESSES OF THE DATA BLOCKS */
 #define NvM_BLOCK_RTC_ADR           (uint8_t)0
 #define NvM_BLOCK_DISPLAY_ADR       (uint8_t)(NvM_BLOCK_RTC_ADR + sizeof(NvM_Block_RTC_t))
+#define NvM_BLOCK_SYSTEM_ADR        (uint8_t)(NvM_BLOCK_DISPLAY_ADR + sizeof(NvM_Block_Display_t))
 // #define NvM_BLOCK_... 
 #define NvM_BLOCK_VALIDITY_ADR      (uint8_t)NvM_LEN_DATA
 /*=================================================================*/
@@ -49,13 +50,14 @@ typedef enum
 {
     NvM_Block_RTC = (uint8_t)0,
     NvM_Block_Display,
+    NvM_Block_System,
     NvM_Block_Force_U8 = (uint8_t)0xFFu
 } NvM_Block_t;
 
 typedef struct NvM_Validity_t
 {
     uint32_t crc;
-    uint32_t pp; /* To store data about the system (SW / HW) */
+    uint32_t pp;    /* To store data about the system (SW / HW) */
 } NvM_Validity_t;
 
 typedef struct NvM_Block_RTC_t
@@ -71,6 +73,11 @@ typedef struct NvM_Block_Display_t
     uint8_t reserved[3];
 } NvM_Block_Display_t;
 
+typedef struct NvM_Block_System_t
+{
+    uint32_t time_to_low_power_ms;
+} NvM_Block_System_t;
+
 /**
  * @brief Structure should be 8 bytes aligned (As chip is 8-byte alligned).
  * 
@@ -84,6 +91,7 @@ typedef struct NvM_Config_t
         {
             NvM_Block_RTC_t rtc;
             NvM_Block_Display_t display;
+            NvM_Block_System_t system;
         };
     } data;
 
@@ -124,6 +132,14 @@ NvM_Status_e NvM_Save_Display(void);
  *  NvM_Status_Error - Operation failed
  */
 NvM_Status_e NvM_Save_Validity(void);
+
+/**
+ * @brief 
+ * 
+ * @return NvM_Status_OK - Operation successfull 
+ *  NvM_Status_Error - Operation failed
+ */
+NvM_Status_e NvM_Save_System(void);
 /*=================================================================*/
 
 /**
